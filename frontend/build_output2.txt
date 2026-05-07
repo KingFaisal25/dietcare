@@ -1,0 +1,168 @@
+﻿   ▲ Next.js 15.5.14
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ⨯ webpackBuildWorker
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.6s
+   Linting and checking validity of types ...
+
+./app/(admin)/admin/assign/page.tsx
+48:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+83:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/blogs/page.tsx
+6:3  Warning: 'FiFilter' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:36  Warning: 'FiEye' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+11:10  Warning: 'Input' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+131:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+177:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+396:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/(admin)/admin/dashboard/page.tsx
+53:11  Warning: 'RevenueData' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+71:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+72:64  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+73:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+74:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+135:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+146:6  Warning: React Hook useEffect has a missing dependency: 'fetchDashboardData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+367:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+417:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+445:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/orders/page.tsx
+8:32  Warning: 'FiEye' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+8:39  Warning: 'FiXCircle' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+16:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+37:6  Warning: React Hook useEffect has a missing dependency: 'fetchOrders'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/(admin)/admin/programs/page.tsx
+13:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/programs/[id]/edit/page.tsx
+189:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/settings/page.tsx
+8:32  Warning: 'FiToggleLeft' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+8:46  Warning: 'FiToggleRight' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+99:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/users/page.tsx
+18:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+43:6  Warning: React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+58:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/layout.tsx
+13:3  Warning: 'FiX' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+113:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/(dashboard)/diary/page.tsx
+3:27  Warning: 'useEffect' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+167:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+204:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+528:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/klien-dashboard/page.tsx
+11:3  Warning: 'FiTrendingUp' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+105:16  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+161:14  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/meal-plan/page.tsx
+17:10  Warning: 'generationId' is assigned a value but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+18:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+19:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+53:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+85:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/onboarding/page.tsx
+9:44  Warning: 'NutritionInput' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./app/(public)/ahli-gizi/page.tsx
+10:3  Warning: 'CalendarCheck' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+491:21  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+491:92  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/(public)/page.tsx
+3:38  Warning: 'useRef' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:18  Warning: 'useScroll' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:29  Warning: 'useTransform' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:43  Warning: 'AnimatePresence' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+8:40  Warning: 'FiActivity' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+10:22  Warning: 'FiClock' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+10:31  Warning: 'FiHeart' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+17:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+397:38  Warning: 'i' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./app/nutritionist/clients/[clientId]/page.tsx
+19:16  Warning: 'idLocale' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+33:3  Warning: 'FiCalendar' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+38:10  Warning: 'MdOutlineMonitorWeight' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+91:6  Warning: React Hook useEffect has a missing dependency: 'fetchMessages'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/ChatbotWidget.tsx
+7:34  Warning: 'User' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+7:78  Warning: 'ArrowLeft' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./components/diary/FoodSearchModal.tsx
+6:41  Warning: 'FiHeart' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+6:50  Warning: 'FiClock' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./components/FoodAnalysisResult.tsx
+7:10  Warning: 'api' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+8:10  Warning: 'PieChart' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+8:45  Warning: 'AlertTriangle' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+35:54  Warning: 'image' is defined but never used. Allowed unused args must match /^_/u.  @typescript-eslint/no-unused-vars
+40:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+115:62  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+115:77  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/FoodCamera.tsx
+15:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+42:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/Footer.tsx
+3:17  Warning: 'useState' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+3:27  Warning: 'useEffect' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+5:8  Warning: 'Image' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+7:3  Warning: 'FiArrowRight' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+7:32  Warning: 'FiStar' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+11:10  Warning: 'Button' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+./components/klien/Sidebar.tsx
+69:14  Warning: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+72:18  Warning: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+
+./components/MealPlanCalendar.tsx
+7:10  Warning: 'Check' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+67:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/ShoppingList.tsx
+6:46  Warning: 'Share2' is defined but never used. Allowed unused vars must match /^_/u.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+node.exe : Failed to compile.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to compile.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./app/(admin)/admin/dashboard/page.tsx:379:28
+Type error: Type '"outline"' is not assignable to type '"default" | "success" | "warning" | "danger" | "info" | 
+"protein" | "carbs" | "fat" | "meal" | undefined'.
+
+[0m [90m 377 |[39m                   [33m<[39m[33m/[39m[33mtd[39m[33m>[39m
+ [90m 378 |[39m                   [33m<[39m[33mtd[39m className[33m=[39m[32m"px-6 py-5"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 379 |[39m                     [33m<[39m[33mBadge[39m 
+variant[33m=[39m[32m"outline"[39m className[33m=[39m[32m"border-neutral-200 text-neutral-500 font-bold text-[10p
+x]"[39m[33m>[39m{t[33m.[39mprogram[33m?[39m[33m.[39mname}[33m<[39m[33m/[39m[33mBadge[39m[33m>[39m
+ [90m     |[39m                            [31m[1m^[22m[39m
+ [90m 380 |[39m                   [33m<[39m[33m/[39m[33mtd[39m[33m>[39m
+ [90m 381 |[39m                   [33m<[39m[33mtd[39m className[33m=[39m[32m"px-6 py-5 font-black 
+text-neutral-900"[39m[33m>[39m{formatRupiah(t[33m.[39mfinal_amount)}[33m<[39m[33m/[39m[33mtd[39m[33m>[39m
+ [90m 382 |[39m                   [33m<[39m[33mtd[39m className[33m=[39m[32m"px-6 py-5"[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

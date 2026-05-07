@@ -1,0 +1,51 @@
+name_id,name_en,category,brand,serving_size,serving_unit,serving_description,calories_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g,fiber_per_100g,sugar_per_100g,sodium_per_100g,cholesterol_per_100g,source,is_verified
+Nasi Putih,White Rice,nasi_sereal,,100,gram,1 porsi (100g),130,2.7,28,0.3,0.4,0,1,0,manual,1
+Nasi Merah,Brown Rice,nasi_sereal,,100,gram,1 porsi (100g),111,2.6,23,0.9,1.8,0,5,0,manual,1
+Nasi Goreng,Fried Rice,nasi_sereal,,200,gram,1 piring sedang (200g),168,4.5,21,7.5,0.5,0.2,450,15,manual,1
+Bubur Ayam,Chicken Porridge,nasi_sereal,,300,gram,1 mangkuk (300g),75,4,12,1.5,0.2,0.1,380,10,manual,1
+Oatmeal,Oatmeal,nasi_sereal,,100,gram,1 mangkuk (100g),389,16.9,66,6.9,10.6,0,2,0,manual,1
+Ayam Goreng,Fried Chicken,lauk_hewani,,100,gram,1 potong (100g),246,25,0,15,0,0,350,85,manual,1
+Ayam Bakar,Grilled Chicken,lauk_hewani,,100,gram,1 potong (100g),165,31,0,3.6,0,0,280,85,manual,1
+Ikan Lele Goreng,Fried Catfish,lauk_hewani,,100,gram,1 ekor (100g),200,18,0,14,0,0,150,60,manual,1
+Telur Ceplok,Fried Egg,lauk_hewani,,50,gram,1 butir (50g),196,13,1,15,0,0,180,370,manual,1
+Bakso Sapi,Beef Meatball,lauk_hewani,,100,gram,5 butir (100g),202,14,12,11,0,0,600,45,manual,1
+Kangkung Tumis,Sauteed Water Spinach,sayuran,,100,gram,1 porsi (100g),45,3,4,2.5,2,0.5,250,0,manual,1
+Bayam Rebus,Boiled Spinach,sayuran,,100,gram,1 mangkuk (100g),23,2.9,3.6,0.4,2.2,0.4,79,0,manual,1
+Buncis,Green Beans,sayuran,,100,gram,1 porsi (100g),31,1.8,7,0.1,3.4,3.3,6,0,manual,1
+Wortel,Carrot,sayuran,,100,gram,1 buah (100g),41,0.9,10,0.2,2.8,4.7,69,0,manual,1
+Brokoli,Broccoli,sayuran,,100,gram,1 mangkuk (100g),34,2.8,7,0.4,2.6,1.7,33,0,manual,1
+Pisang Ambon,Ambon Banana,buah,,100,gram,1 buah (100g),89,1.1,23,0.3,2.6,12,1,0,manual,1
+Jeruk,Orange,buah,,100,gram,1 buah (100g),47,0.9,12,0.1,2.4,9,0,0,manual,1
+Apel Merah,Red Apple,buah,,100,gram,1 buah (100g),52,0.3,14,0.2,2.4,10,1,0,manual,1
+Semangka,Watermelon,buah,,100,gram,1 potong (100g),30,0.6,8,0.2,0.4,6,1,0,manual,1
+Mangga,Mango,buah,,100,gram,1 buah (100g),60,0.8,15,0.4,1.6,14,1,0,manual,1
+Air Putih,Mineral Water,minuman,,250,ml,1 gelas (250ml),0,0,0,0,0,0,0,0,manual,1
+Susu Full Cream,Full Cream Milk,minuman,,250,ml,1 gelas (250ml),60,3.2,4.8,3.3,0,5,40,10,manual,1
+Teh Manis,Sweet Tea,minuman,,250,ml,1 gelas (250ml),35,0,9,0,0,9,2,0,manual,1
+Kopi Hitam,Black Coffee,minuman,,200,ml,1 cangkir (200ml),1,0.1,0,0,0,0,2,0,manual,1
+Jus Jeruk Segar,Fresh Orange Juice,minuman,,250,ml,1 gelas (250ml),45,0.7,10,0.2,0.2,8,1,0,manual,1
+Gorengan Tempe,Fried Tempeh,jajanan,,50,gram,1 potong (50g),200,10,15,12,2,0,150,0,manual,1
+Martabak Manis,Sweet Martabak,jajanan,,100,gram,1 potong (100g),280,6,45,10,1,25,300,45,manual,1
+Cireng,Fried Tapioca,jajanan,,30,gram,1 biji (30g),120,1,25,2,0,0,200,0,manual,1
+Ketoprak,Ketoprak,jajanan,,350,gram,1 porsi (350g),150,5,15,8,2,2,400,0,manual,1
+Tempe Bacem,Sweet Tempeh,lauk_nabati,,50,gram,1 potong (50g),150,9,12,8,2,5,120,0,manual,1
+Tahu Goreng,Fried Tofu,lauk_nabati,,50,gram,1 potong (50g),115,8,3,9,1,0,10,0,manual,1
+Gado-gado,Gado-gado,jajanan,,300,gram,1 porsi (300g),132,6,12,7,3,4,450,0,manual,1
+Sate Ayam,Chicken Satay,lauk_hewani,,100,gram,5 tusuk (100g),185,22,5,8,0,2,350,70,manual,1
+Rendang Sapi,Beef Rendang,lauk_hewani,,100,gram,1 potong (100g),195,18,5,12,1,2,450,65,manual,1
+Soto Ayam,Chicken Soto,nasi_sereal,,400,gram,1 mangkuk (400g),80,6,10,2,0,1,650,25,manual,1
+Siomay Bandung,Siomay,jajanan,,100,gram,3 biji (100g),160,8,18,6,1,2,550,35,manual,1
+Pempek Kapal Selam,Pempek,jajanan,,150,gram,1 porsi (150g),240,12,35,5,0,2,800,90,manual,1
+Bakwan Sayur,Vegetable Fritter,jajanan,,50,gram,1 biji (50g),140,2,18,7,1,1,250,0,manual,1
+Es Teh Manis,Iced Sweet Tea,minuman,,300,ml,1 gelas (300ml),40,0,10,0,0,10,2,0,manual,1
+Indomie Goreng,Indomie Fried,makanan_cepat_saji,Indofood,85,gram,1 bungkus (85g),450,9,62,18,3,8,950,0,manual,1
+KFC Fried Chicken,KFC Chicken,makanan_cepat_saji,KFC,100,gram,1 potong (100g),260,20,10,16,0,0,650,75,manual,1
+McDouble,McDouble,makanan_cepat_saji,McDonalds,150,gram,1 burger (150g),380,22,34,18,2,7,850,75,manual,1
+Pizza Meat Lovers,Pizza Meat Lovers,makanan_cepat_saji,Pizza Hut,120,gram,1 slice (120g),280,14,28,12,2,3,600,35,manual,1
+Burger King Whopper,Whopper,makanan_cepat_saji,Burger King,290,gram,1 burger (290g),660,28,49,40,4,11,980,90,manual,1
+Nugget Ayam,Chicken Nugget,makanan_cepat_saji,,100,gram,5 biji (100g),250,15,15,15,1,1,550,45,manual,1
+Vitamin C 1000mg,Vitamin C,suplemen,You-C 1000,140,ml,1 botol (140ml),60,0,15,0,0,15,20,0,manual,1
+Whey Protein,Whey Protein,suplemen,,30,gram,1 scoop (30g),120,24,3,1,0,1,50,50,manual,1
+Multivitamin,Multivitamin,suplemen,,1,tablet,1 tablet,0,0,0,0,0,0,0,0,manual,1
+Fish Oil,Fish Oil,suplemen,,1,softgel,1 softgel,10,0,0,1,0,0,0,0,manual,1
+Calcium Carbonate,Calcium,suplemen,,1,tablet,1 tablet,0,0,0,0,0,0,0,0,manual,1

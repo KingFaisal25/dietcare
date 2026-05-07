@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "name": "DietCare Health UI Tokens",
+    "version": "1.0.0"
+  },
+  "color": {
+    "primary": {
+      "50": "#eefcf5",
+      "100": "#d6f6e5",
+      "200": "#b2edd0",
+      "300": "#7dddb1",
+      "400": "#43c98f",
+      "500": "#1da271",
+      "600": "#14855d",
+      "700": "#116a4c",
+      "800": "#0d503a",
+      "900": "#0a3728"
+    },
+    "secondary": {
+      "50": "#eaf1ff",
+      "100": "#d6e2ff",
+      "500": "#2f6fed",
+      "600": "#245bca",
+      "700": "#1d499f"
+    },
+    "accent": {
+      "50": "#fff4e4",
+      "100": "#ffe5be",
+      "500": "#f4a53a",
+      "600": "#d1841c"
+    },
+    "neutral": {
+      "0": "#ffffff",
+      "50": "#f7faf8",
+      "100": "#eef4f1",
+      "200": "#dae6e0",
+      "300": "#c1d2ca",
+      "400": "#8aa094",
+      "500": "#5b7066",
+      "600": "#41544c",
+      "700": "#2b3933",
+      "800": "#1d2723",
+      "900": "#101714",
+      "950": "#090d0b"
+    },
+    "semantic": {
+      "success": "#1fa971",
+      "warning": "#d88a1f",
+      "danger": "#dc5c5c",
+      "info": "#3178f6"
+    }
+  },
+  "fontFamily": {
+    "heading": "\"Plus Jakarta Sans\", \"Inter\", Arial, sans-serif",
+    "body": "\"Inter\", \"DM Sans\", Arial, sans-serif",
+    "mono": "\"JetBrains Mono\", \"SFMono-Regular\", Consolas, monospace"
+  },
+  "fontSize": {
+    "body": "16px"
+  },
+  "fontWeight": {
+    "heading": 800
+  },
+  "lineHeight": {
+    "body": 1.6
+  },
+  "spacing": {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px",
+    "16": "64px"
+  },
+  "radius": {
+    "sm": "10px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px",
+    "pill": "999px"
+  },
+  "shadow": {
+    "card": "0 12px 30px rgba(16,23,20,0.08)",
+    "float": "0 18px 50px rgba(16,23,20,0.12)",
+    "modal": "0 28px 80px rgba(16,23,20,0.18)",
+    "green": "0 16px 40px rgba(29,162,113,0.22)"
+  },
+  "breakpoint": {
+    "xs": "320px",
+    "md": "768px",
+    "lg": "1024px",
+    "2xl": "1440px"
+  },
+  "grid": {
+    "columns": 12,
+    "gutter": {
+      "xs": "16px",
+      "md": "24px",
+      "lg": "28px",
+      "2xl": "32px"
+    }
+  },
+  "motion": {
+    "fast": "160ms cubic-bezier(0.4, 0, 0.2, 1)",
+    "base": "240ms cubic-bezier(0.4, 0, 0.2, 1)",
+    "slow": "420ms cubic-bezier(0.4, 0, 0.2, 1)",
+    "spring": "520ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+  }
+}

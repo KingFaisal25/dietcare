@@ -1,0 +1,168 @@
+﻿   ▲ Next.js 15.5.14
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ⨯ webpackBuildWorker
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 13.6s
+   Linting and checking validity of types ...
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Failed to compile.
+
+./app/(admin)/admin/assign/page.tsx
+48:15  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+83:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/blogs/page.tsx
+6:3  Error: 'FiFilter' is defined but never used.  @typescript-eslint/no-unused-vars
+6:36  Error: 'FiEye' is defined but never used.  @typescript-eslint/no-unused-vars
+11:10  Error: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+131:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+177:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from 
+`next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from 
+your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+396:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from 
+`next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from 
+your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/(admin)/admin/dashboard/page.tsx
+53:11  Error: 'RevenueData' is defined but never used.  @typescript-eslint/no-unused-vars
+71:60  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+72:64  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+73:50  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+74:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+135:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+146:6  Warning: React Hook useEffect has a missing dependency: 'fetchDashboardData'. Either include it or remove the 
+dependency array.  react-hooks/exhaustive-deps
+367:43  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+417:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+445:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/orders/page.tsx
+8:32  Error: 'FiEye' is defined but never used.  @typescript-eslint/no-unused-vars
+8:39  Error: 'FiXCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+16:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+37:6  Warning: React Hook useEffect has a missing dependency: 'fetchOrders'. Either include it or remove the 
+dependency array.  react-hooks/exhaustive-deps
+
+./app/(admin)/admin/programs/page.tsx
+13:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/programs/[id]/edit/page.tsx
+189:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/settings/page.tsx
+8:32  Error: 'FiToggleLeft' is defined but never used.  @typescript-eslint/no-unused-vars
+8:46  Error: 'FiToggleRight' is defined but never used.  @typescript-eslint/no-unused-vars
+99:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/admin/users/page.tsx
+18:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+43:6  Warning: React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency 
+array.  react-hooks/exhaustive-deps
+58:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(admin)/layout.tsx
+13:3  Error: 'FiX' is defined but never used.  @typescript-eslint/no-unused-vars
+113:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from 
+`next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from 
+your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./app/(dashboard)/diary/page.tsx
+3:27  Error: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+167:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+204:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+528:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/klien-dashboard/page.tsx
+11:3  Error: 'FiTrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+105:16  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+161:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/meal-plan/page.tsx
+17:10  Error: 'generationId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+18:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+19:42  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+53:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:16  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+85:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/onboarding/page.tsx
+9:44  Error: 'NutritionInput' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(public)/ahli-gizi/page.tsx
+10:3  Error: 'CalendarCheck' is defined but never used.  @typescript-eslint/no-unused-vars
+491:21  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+491:92  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/(public)/page.tsx
+3:38  Error: 'useRef' is defined but never used.  @typescript-eslint/no-unused-vars
+6:18  Error: 'useScroll' is defined but never used.  @typescript-eslint/no-unused-vars
+6:29  Error: 'useTransform' is defined but never used.  @typescript-eslint/no-unused-vars
+6:43  Error: 'AnimatePresence' is defined but never used.  @typescript-eslint/no-unused-vars
+8:40  Error: 'FiActivity' is defined but never used.  @typescript-eslint/no-unused-vars
+10:22  Error: 'FiClock' is defined but never used.  @typescript-eslint/no-unused-vars
+10:31  Error: 'FiHeart' is defined but never used.  @typescript-eslint/no-unused-vars
+17:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+397:38  Error: 'i' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/nutritionist/clients/[clientId]/page.tsx
+19:16  Error: 'idLocale' is defined but never used.  @typescript-eslint/no-unused-vars
+33:3  Error: 'FiCalendar' is defined but never used.  @typescript-eslint/no-unused-vars
+38:10  Error: 'MdOutlineMonitorWeight' is defined but never used.  @typescript-eslint/no-unused-vars
+91:6  Warning: React Hook useEffect has a missing dependency: 'fetchMessages'. Either include it or remove the 
+dependency array.  react-hooks/exhaustive-deps
+
+./components/ChatbotWidget.tsx
+7:34  Error: 'User' is defined but never used.  @typescript-eslint/no-unused-vars
+7:78  Error: 'ArrowLeft' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/diary/FoodSearchModal.tsx
+6:41  Error: 'FiHeart' is defined but never used.  @typescript-eslint/no-unused-vars
+6:50  Error: 'FiClock' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/FoodAnalysisResult.tsx
+7:10  Error: 'api' is defined but never used.  @typescript-eslint/no-unused-vars
+8:10  Error: 'PieChart' is defined but never used.  @typescript-eslint/no-unused-vars
+8:45  Error: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+35:54  Error: 'image' is defined but never used.  @typescript-eslint/no-unused-vars
+40:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+115:62  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+115:77  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/FoodCamera.tsx
+15:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+42:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from 
+`next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from 
+your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/Footer.tsx
+3:17  Error: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+3:27  Error: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+5:8  Error: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+7:3  Error: 'FiArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+7:32  Error: 'FiStar' is defined but never used.  @typescript-eslint/no-unused-vars
+11:10  Error: 'Button' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/klien/Sidebar.tsx
+69:14  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is 
+error-free.  @typescript-eslint/ban-ts-comment
+72:18  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is 
+error-free.  @typescript-eslint/ban-ts-comment
+
+./components/MealPlanCalendar.tsx
+7:10  Error: 'Check' is defined but never used.  @typescript-eslint/no-unused-vars
+67:51  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/ShoppingList.tsx
+6:46  Error: 'Share2' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: 
+https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
