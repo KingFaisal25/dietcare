@@ -1,0 +1,113 @@
+﻿services:
+  - type: web
+    name: dietcare-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_SAME_SITE
+        value: none
+      - key: SESSION_DOMAIN
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase: { name: dietcare-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: dietcare-db, property: port }
+      - key: DB_DATABASE
+        fromDatabase: { name: dietcare-db, property: database }
+      - key: DB_USERNAME
+        fromDatabase: { name: dietcare-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: dietcare-db, property: password }
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+  - type: worker
+    name: dietcare-worker
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        fromService: { type: web, name: dietcare-api, envVarKey: APP_KEY }
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase: { name: dietcare-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: dietcare-db, property: port }
+      - key: DB_DATABASE
+        fromDatabase: { name: dietcare-db, property: database }
+      - key: DB_USERNAME
+        fromDatabase: { name: dietcare-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: dietcare-db, property: password }
+      - key: QUEUE_CONNECTION
+        value: database
+  - type: cron
+    name: dietcare-scheduler
+    runtime: docker
+    plan: free
+    schedule: "*/5 * * * *"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: php artisan schedule:run
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        fromService: { type: web, name: dietcare-api, envVarKey: APP_KEY }
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase: { name: dietcare-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: dietcare-db, property: port }
+      - key: DB_DATABASE
+        fromDatabase: { name: dietcare-db, property: database }
+      - key: DB_USERNAME
+        fromDatabase: { name: dietcare-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: dietcare-db, property: password }
+databases:
+  - name: dietcare-db
+    plan: free
+    databaseName: dietcare
+    user: dietcare
