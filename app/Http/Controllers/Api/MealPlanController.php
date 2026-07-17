@@ -81,4 +81,12 @@ class MealPlanController extends Controller
 
         return response()->json($history);
     }
+
+    public function destroy($id)
+    {
+        $generation = MealPlanGeneration::where('user_id', Auth::id())->findOrFail($id);
+        $generation->delete();
+
+        return response()->json(['message' => 'Meal plan berhasil dihapus.']);
+    }
 }

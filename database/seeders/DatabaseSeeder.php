@@ -1,10 +1,9 @@
-﻿<?php
+<?php
 
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,53 +13,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolePermissionSeeder::class,
+            SystemAccountsSeeder::class,
             PromoCodeSeeder::class,
             NutritionistProfileSeeder::class,
             WeightLogSeeder::class,
             ShopProductSeeder::class,
+            BlogContentSeeder::class,
         ]);
 
-        // 1. Admin User Seeder
-        $admin = \App\Models\User::updateOrCreate(
-            ['email' => 'admin@DietCare.com'],
-            [
-                'name' => 'Admin DietCare',
-                'username' => 'admin',
-                'password' => Hash::make('password123'),
-                'phone' => '081234567890',
-                'email_verified_at' => now(),
-            ]
-        );
-        $admin->assignRole('admin');
-
-        // 2. Sample Nutritionist User
-        $nutritionist = \App\Models\User::updateOrCreate(
-            ['email' => 'nadia@DietCare.com'],
-            [
-                'name' => 'Nadia ',
-                'username' => 'nadia',
-                'password' => Hash::make('password123'),
-                'phone' => '081234567891',
-                'email_verified_at' => now(),
-            ]
-        );
-        $nutritionist->assignRole('nutritionist');
-
-        // 3. Sample Client User
-        $client = \App\Models\User::updateOrCreate(
-            ['email' => 'budi@gmail.com'],
-            [
-                'name' => 'Budi Santoso',
-                'username' => 'budi',
-                'password' => Hash::make('password123'),
-                'phone' => '081234567892',
-                'email_verified_at' => now(),
-            ]
-        );
-        $client->assignRole('client');
-
-        // 4. Default Programs Seeder
+        // Default Programs
         foreach ([
             [
                 'name' => 'Basic Weight Loss',
@@ -105,7 +66,7 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 3. Sample Food Database Seeder
+        // Sample Food Database
         foreach ([
             [
                 'name_id' => 'Nasi Putih',

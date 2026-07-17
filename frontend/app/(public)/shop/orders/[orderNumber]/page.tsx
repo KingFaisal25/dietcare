@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useAuthStore } from '@/lib/store/authStore';
+import api from '@/lib/api';
 import { ShopOrder } from '@/types/shop';
 import { FiArrowLeft, FiPackage, FiTruck, FiCheckCircle, FiClock, FiMapPin } from 'react-icons/fi';
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
 const fmt = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
@@ -29,18 +28,16 @@ function dateFmt(d: string | null) {
 
 export default function TrackOrderPage() {
   const { orderNumber } = useParams<{ orderNumber: string }>();
-  const { token } = useAuthStore();
   const [order, setOrder] = useState<ShopOrder | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || !orderNumber) { setLoading(false); return; }
-    fetch(`${API}/shop/orders/${orderNumber}/track`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d) => setOrder(d.data ?? null))
+    if (!orderNumber) { setLoading(false); return; }
+    api.get(`/shop/orders/${orderNumber}/track`)
+      .then((res) => setOrder(res.data.data ?? null))
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
-  }, [orderNumber, token]);
+  }, [orderNumber]);
 
   const curIdx = FLOW.findIndex((s) => s.key === order?.status);
 

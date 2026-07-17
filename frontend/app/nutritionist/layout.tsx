@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import {
   CalendarRange, ChevronLeft, LayoutDashboard,
-  LogOut, Menu, Salad, Users, UserCircle, X, Bell, Search,
+  LogOut, Menu, Salad, Users, UserCircle, X, Search,
 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useAuthStore } from "@/lib/store/authStore";
 import { Scene3DBackground } from "@/components/ui/Scene3DBackground";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 
 const navItems = [
   { href: "/nutritionist/dashboard", label: "Dashboard",       icon: LayoutDashboard },
@@ -58,7 +59,7 @@ export default function NutritionistLayout({ children }: { children: ReactNode }
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-3 rounded-xl border border-[color:var(--border-color)] bg-[var(--background-soft)] p-3">
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Gizi")}&background=065f46&color=34d399&bold=true`}
+              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Gizi")}&background=065f46&color=34d399&bold=true`}
               alt={user?.name}
               className="h-9 w-9 rounded-xl object-cover flex-shrink-0"
             />
@@ -132,10 +133,7 @@ export default function NutritionistLayout({ children }: { children: ReactNode }
             <p className="text-sm font-bold text-white">DietCare</p>
           </div>
           <div className="ml-auto">
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--border-color)] bg-[var(--background)] text-neutral-500 transition-all hover:text-brand-600">
-              <Bell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500" />
-            </button>
+            <NotificationBell />
           </div>
         </header>
 
@@ -151,13 +149,10 @@ export default function NutritionistLayout({ children }: { children: ReactNode }
           </div>
           <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--border-color)] bg-[var(--background)] text-neutral-500 transition-all hover:text-brand-600">
-              <Bell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500" />
-            </button>
+            <NotificationBell />
             <div className="flex items-center gap-2.5 border-l border-[color:var(--border-color)] pl-3">
               <img
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Gizi")}&background=065f46&color=34d399&bold=true`}
+                src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Gizi")}&background=065f46&color=34d399&bold=true`}
                 alt="Profile"
                 className="h-8 w-8 rounded-xl object-cover"
               />

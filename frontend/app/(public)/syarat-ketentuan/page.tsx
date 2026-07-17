@@ -9,7 +9,7 @@ const TermsPage = () => {
       <div className="container mx-auto max-w-4xl">
         <div className="mb-12 text-center space-y-4">
           <h1 className="text-4xl font-black text-gray-900">Syarat & Ketentuan</h1>
-          <p className="text-gray-500 font-medium italic">Terakhir diperbarui: 1 April 2024</p>
+          <p className="text-gray-500 font-medium italic">Terakhir diperbarui: 1 April 2026</p>
         </div>
 
         <Card className="p-8 md:p-12 prose prose-green max-w-none shadow-xl">
@@ -69,7 +69,7 @@ const TermsPage = () => {
 
           <div className="pt-8 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-400">Pertanyaan mengenai legalitas? Hubungi kami di:</p>
-            <p className="font-bold text-gray-700">admin@nutripro.id</p>
+            <p className="font-bold text-gray-700">admin@dietcare.id</p>
           </div>
         </Card>
       </div>

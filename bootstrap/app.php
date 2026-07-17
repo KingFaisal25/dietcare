@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         // a. Reminder log makan sarapan — 07:00 WIB
         $schedule->call(function () {
-            User::role('client')->each(function ($user) {
+            User::role('patient')->each(function ($user) {
                 dispatch(new SendReminderJob(
                     $user->id, 
                     'meal_reminder', 
@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // b. Reminder log makan malam — 19:30 WIB
         $schedule->call(function () {
-            User::role('client')->each(function ($user) {
+            User::role('patient')->each(function ($user) {
                 dispatch(new SendReminderJob(
                     $user->id, 
                     'meal_reminder', 
@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // c. Reminder timbang badan — Senin 07:30 WIB
         $schedule->call(function () {
-            User::role('client')->each(function ($user) {
+            User::role('patient')->each(function ($user) {
                 dispatch(new SendReminderJob(
                     $user->id, 
                     'weight_reminder', 
@@ -58,27 +58,30 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // d. Reminder konsultasi — 1 jam sebelum jadwal
         $schedule->call(function () {
-            $consultations = Consultation::where('status', 'scheduled')
+            $consultations = Consultation::with('nutritionistProgram')
+                ->where('status', 'scheduled')
                 ->whereBetween('scheduled_at', [now(), now()->addHour()])
                 ->get();
             
             foreach ($consultations as $consultation) {
-                // Send to Client
-                dispatch(new SendReminderJob(
-                    $consultation->user_id, 
-                    'consultation_reminder', 
-                    'Konsultasi Segera Dimulai', 
-                    'Konsultasi video call kamu mulai dalam 1 jam!',
-                    ['consultation_id' => $consultation->id]
-                ));
-                // Send to Nutritionist
-                dispatch(new SendReminderJob(
-                    $consultation->nutritionist_id, 
-                    'consultation_reminder', 
-                    'Konsultasi Segera Dimulai', 
-                    'Konsultasi video call dengan klien mulai dalam 1 jam!',
-                    ['consultation_id' => $consultation->id]
-                ));
+                if ($consultation->nutritionistProgram) {
+                    // Send to Client
+                    dispatch(new SendReminderJob(
+                        $consultation->nutritionistProgram->client_id, 
+                        'consultation_reminder', 
+                        'Konsultasi Segera Dimulai', 
+                        'Konsultasi video call kamu mulai dalam 1 jam!',
+                        ['consultation_id' => $consultation->id]
+                    ));
+                    // Send to Nutritionist
+                    dispatch(new SendReminderJob(
+                        $consultation->nutritionistProgram->nutritionist_id, 
+                        'consultation_reminder', 
+                        'Konsultasi Segera Dimulai', 
+                        'Konsultasi video call dengan klien mulai dalam 1 jam!',
+                        ['consultation_id' => $consultation->id]
+                    ));
+                }
             }
         })->everyFifteenMinutes();
 
@@ -90,7 +93,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             foreach ($programs as $program) {
                 dispatch(new SendReminderJob(
-                    $program->user_id, 
+                    $program->client_id, 
                     'program_expiring', 
                     'Program Hampir Selesai', 
                     'Program kamu akan selesai dalam 7 hari. Mau lanjut?',
@@ -100,13 +103,24 @@ return Application::configure(basePath: dirname(__DIR__))
         })->daily();
     })
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
+        $middleware->statefulApi();
+
+        // JANGAN tambahkan XSRF-TOKEN ke except list.
+        // Laravel perlu mengenkripsi cookie XSRF-TOKEN agar validasi X-XSRF-TOKEN header bisa bekerja.
+        // VerifyCsrfToken::getTokenFromRequest() mendekripsi nilai X-XSRF-TOKEN header menggunakan encrypter.
+        // Jika cookie tidak terenkripsi, dekripsi gagal → token kosong → 419 selalu.
+
+        // Jangan tambahkan validateCsrfTokens(except: [...]) untuk route api karena
+        // statefulApi() sudah menangani CSRF via EnsureFrontendRequestsAreStateful.
+        // Route api/* tidak menggunakan web middleware, jadi validateCsrfTokens di web tidak berlaku.
+
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'admin' => \App\Http\Middleware\AdminOnly::class,
-            'nutritionist' => \App\Http\Middleware\NutritionistOnly::class,
-            'client' => \App\Http\Middleware\ClientOnly::class,
+            'prevent_role_escalation' => \App\Http\Middleware\PreventRoleEscalation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

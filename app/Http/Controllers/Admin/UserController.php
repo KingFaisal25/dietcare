@@ -42,7 +42,7 @@ class UserController extends Controller
     public function updateRole(Request $request, $id)
     {
         $request->validate([
-            'role' => 'required|in:admin,nutritionist,client',
+            'role' => 'required|in:admin,nutritionist,patient',
         ]);
 
         // Prevent self-role-change

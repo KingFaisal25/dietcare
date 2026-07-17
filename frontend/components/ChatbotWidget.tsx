@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { MessageCircle, X, Send, Sparkles, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { buildApiUrl } from "@/lib/url";
+import { sanctumFetch, resolveApiUrl } from "@/lib/auth";
 
 interface Message {
   role: "user" | "assistant";
@@ -38,12 +38,8 @@ export default function ChatbotWidget() {
     setIsTyping(true);
 
     try {
-      const response = await fetch(buildApiUrl("/chatbot/message"), {
+      const response = await sanctumFetch(resolveApiUrl("/chatbot/message"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        },
         body: JSON.stringify({
           message: userMessage,
           history: messages.slice(-10),
@@ -137,8 +133,8 @@ export default function ChatbotWidget() {
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold">Nadia ✨</h3>
-                    <p className="text-[10px] opacity-80">Asisten Gizi AI • Online 24/7</p>
+                    <h3 className="font-bold">Hallo Panggil Saja aku Nadia ✨</h3>
+                    <p className="text-[10px] opacity-80">Asisten Gizi Diet Care• Online 24/7</p>
                   </div>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full transition-colors">

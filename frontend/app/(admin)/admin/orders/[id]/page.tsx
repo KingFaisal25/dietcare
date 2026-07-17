@@ -13,7 +13,7 @@ const OrderDetail = ({ params }: { params: Promise<{ id: string }> }) => {
     id: resolvedParams.id,
     client: { name: 'Andi Wijaya', email: 'andi@gmail.com', phone: '081234567890' },
     program: { name: 'Body Goals', type: 'Intensif', duration: '30 Hari' },
-    nutritionist: { name: 'Salma S.Gz', id: 1 },
+    nutritionist: { name: 'Tim Ahli Gizi', id: 1 },
     payment: { total: 609900, method: 'QRIS', midtrans_id: 'MID-12345-ABCD', status: 'Settlement' },
     status: 'Paid',
     date: '2024-03-21 14:30:00',

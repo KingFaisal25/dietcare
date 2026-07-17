@@ -48,7 +48,7 @@ interface UserData {
     promo_article: boolean;
     nutritionist_msg: boolean;
   };
-  nutritionist_programs?: {
+  client_programs?: {
     id: string;
     program: {
       name: string;
@@ -57,6 +57,12 @@ interface UserData {
     start_date: string;
   }[];
 }
+
+const getAvatarUrl = (avatar: string | null): string => {
+  if (!avatar) return '';
+  if (avatar.startsWith('http')) return avatar;
+  return avatar.startsWith('/') ? avatar : `/storage/${avatar}`;
+};
 
 const ClientProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profil');
@@ -188,7 +194,11 @@ const ClientProfilePage = () => {
       formData.append('photo', e.target.files[0]);
       setIsLoadingSave(true);
       try {
-        const res = await api.post('/client/profile/photo', formData);
+        const res = await api.post('/client/profile/photo', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         if (userData) {
           setUserData({ ...userData, avatar: res.data.avatar_url });
         }
@@ -280,7 +290,7 @@ const ClientProfilePage = () => {
               <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-green-50 bg-gray-100">
                 {userData.avatar ? (
                   <Image 
-                    src={userData.avatar} 
+                    src={getAvatarUrl(userData.avatar)} 
                     alt={userData.name} 
                     width={128} 
                     height={128} 
@@ -320,7 +330,7 @@ const ClientProfilePage = () => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400">Total Program</span>
-                <span className="font-bold text-gray-700">{userData.nutritionist_programs?.length || 0}</span>
+                <span className="font-bold text-gray-700">{userData.client_programs?.length || 0}</span>
               </div>
             </div>
           </Card>
@@ -330,8 +340,8 @@ const ClientProfilePage = () => {
               <FiCalendar className="text-green-600" /> Riwayat Program
             </h4>
             <div className="space-y-3">
-              {userData.nutritionist_programs && userData.nutritionist_programs.length > 0 ? (
-                userData.nutritionist_programs.map((p) => (
+              {userData.client_programs && userData.client_programs.length > 0 ? (
+                userData.client_programs.map((p) => (
                   <div key={p.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 group">
                     <div className="flex justify-between items-start">
                       <div>

@@ -35,7 +35,7 @@ class AdminDashboardTest extends TestCase
         ]);
 
         $this->client = User::factory()->create(['email' => 'client@test.com']);
-        $this->client->assignRole('client');
+        $this->client->assignRole('patient');
 
         $this->program = Program::create([
             'name' => 'Test Program',

@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'DietCare — Konsultasi Gizi Online dengan Ahli Gizi Tersertifikasi',
@@ -32,6 +32,8 @@ export const metadata: Metadata = {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import NadiaChat from '@/components/NadiaChat';
+import ExitIntentPopup from '@/components/ExitIntentPopup';
 
 export default function PublicLayout({
   children,
@@ -43,6 +45,8 @@ export default function PublicLayout({
       <Navbar />
       {children}
       <Footer />
+      <NadiaChat />
+      <ExitIntentPopup />
     </>
   );
 }

@@ -1,14 +1,20 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { 
+import {
   FiTarget,
   FiVideo,
   FiCalendar,
-  FiTrendingUp
+  FiTrendingUp,
+  FiChevronRight,
+  FiPlus,
+  FiPieChart,
+  FiActivity,
+  FiArrowLeft
 } from "react-icons/fi";
 import { HiFire } from "react-icons/hi2";
 import { FaDumbbell, FaWeight } from "react-icons/fa";
@@ -19,9 +25,12 @@ import Image from "next/image";
 import FoodSearchModal from "@/components/diary/FoodSearchModal";
 import BarcodeScanner from "@/components/diary/BarcodeScanner";
 import { toast } from "sonner";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Scene3DBackground } from "@/components/ui/Scene3DBackground";
 import { TiltCard } from "@/components/ui/TiltCard";
+import { Skeleton, SkeletonCard, SkeletonAvatar } from "@/components/ui/Skeleton";
+
+import { BodyComposition3D } from "@/components/BodyComposition3D";
 
 // --- Tipe Data ---
 interface DashboardData {
@@ -49,7 +58,7 @@ interface DashboardData {
     nutritionistPhoto: string;
     date: string;
     time: string;
-    isSoon: boolean; // < 30 menit
+    isSoon: boolean;
   } | null;
   weeklyTarget: {
     targetWeightLoss: number;
@@ -57,7 +66,6 @@ interface DashboardData {
   };
 }
 
-// --- Dummy Data Fallback ---
 const dummyData: DashboardData = {
   user: {
     name: "Klien",
@@ -79,9 +87,9 @@ const dummyData: DashboardData = {
     fat: { consumed: 38, target: 50 },
   },
   nextConsultation: {
-    nutritionistName: ", S.Gz",
-    nutritionistPhoto: "https://ui-avatars.com/api/?name=&background=f0fdf6&color=16a361",
-    date: "2025-01-05",
+    nutritionistName: "Tim Ahli Gizi",
+    nutritionistPhoto: "https://ui-avatars.com/api/?name=Tim+Ahli+Gizi&background=f0fdf6&color=16a361",
+    date: "2026-05-10",
     time: "10:00",
     isSoon: true,
   },
@@ -97,31 +105,35 @@ export default function KlienDashboardPage() {
   const [activeMealType, setActiveMealType] = useState('breakfast');
   const [animatedDasharray, setAnimatedDasharray] = useState(0);
 
-  // 1. Fetch Dashboard Data
-  const { data, isLoading, refetch } = useQuery<DashboardData>({
+  const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ["dashboardData"],
     queryFn: async () => {
       try {
         const res = await api.get("/client/dashboard");
         return res.data.data as DashboardData;
       } catch (err) {
-        console.warn("API error, using dummy data");
-        return dummyData;
+        throw err;
       }
     },
   });
 
-  const d = data || dummyData;
-  const calPercent = Math.min((d.stats.caloriesConsumed / d.stats.caloriesTarget) * 100, 100);
-  const calRemaining = d.stats.caloriesTarget - d.stats.caloriesConsumed;
-  
-  // Animation for Donut Chart
+  const calPercent = data ? Math.min((data.stats.caloriesConsumed / data.stats.caloriesTarget) * 100, 100) : 0;
+
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setAnimatedDasharray(calPercent);
-    }, 100);
+    const timeout = setTimeout(() => setAnimatedDasharray(calPercent), 100);
     return () => clearTimeout(timeout);
   }, [calPercent]);
+
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6 text-center">
+        <div><h1 className="text-xl font-black text-slate-900">Dashboard belum dapat dimuat</h1><p className="mt-2 text-sm text-slate-500">Data akun sedang tidak tersedia. Coba lagi beberapa saat.</p><Button className="mt-5" onClick={() => refetch()}>Coba lagi</Button></div>
+      </div>
+    );
+  }
+
+  const d = data;
+  const calRemaining = d.stats.caloriesTarget - d.stats.caloriesConsumed;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -129,13 +141,6 @@ export default function KlienDashboardPage() {
     if (hour < 15) return "Selamat siang";
     if (hour < 19) return "Selamat sore";
     return "Selamat malam";
-  };
-
-  const getMotivation = () => {
-    if (calPercent >= 100) return "Target kalori hari ini sudah tercapai! 🎯";
-    if (calPercent >= 80) return `Kamu sudah ${Math.round(calPercent)}% target kalori hari ini! 🎉`;
-    if (calPercent >= 50) return "Setengah jalan menuju target kalori hari ini! 💪";
-    return "Ayo mulai isi jurnal makananmu hari ini! 🥗";
   };
 
   const handleOpenLog = (mealType: string) => {
@@ -151,12 +156,10 @@ export default function KlienDashboardPage() {
   const handleBarcodeScan = async (barcode: string) => {
     setIsScannerOpen(false);
     toast.loading("Mencari produk...", { id: "barcode-search" });
-    
     try {
       const res = await api.get(`/foods/barcode/${barcode}`);
       if (res.data.data) {
         toast.success("Produk ditemukan!", { id: "barcode-search" });
-        // Handle food addition logic
       } else {
         toast.error("Produk tidak ditemukan", { id: "barcode-search" });
       }
@@ -167,259 +170,419 @@ export default function KlienDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+      <div className="min-h-screen bg-[var(--background)] pb-24 lg:pb-12 relative overflow-hidden transition-colors duration-500">
+        <Scene3DBackground subtle />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32 rounded-lg" />
+              <Skeleton className="h-12 w-64 rounded-xl" />
+              <Skeleton className="h-4 w-48 rounded-lg" />
+            </div>
+            <div className="flex gap-4 p-2 bg-[var(--background-elevated)] rounded-2xl border border-[var(--border-color)] shadow-sm">
+              <Skeleton className="h-12 w-32 rounded-xl" />
+              <Skeleton className="h-12 w-32 rounded-xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-7 h-[400px] bg-[var(--background-elevated)] rounded-[2.5rem] border border-[var(--border-color)] p-10">
+              <div className="flex justify-between mb-10">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="flex gap-12">
+                <Skeleton className="h-48 w-48 rounded-full" />
+                <div className="flex-1 space-y-8">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              </div>
+            </div>
+            <div className="lg:col-span-5 space-y-8">
+              <Skeleton className="h-48 w-full rounded-[2.5rem]" />
+              <Skeleton className="h-48 w-full rounded-[2.5rem]" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-24 lg:pb-8 relative">
+    <div className="min-h-screen bg-[var(--background)] pb-24 lg:pb-12 relative overflow-hidden transition-colors duration-500">
       <Scene3DBackground subtle />
       
-      {/* 1. GREETING ROW */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
-        <div>
-          <h1 className="text-[22px] font-bold text-white">
-            {getGreeting()}, {d.user.name}! 👋
-          </h1>
-          <p className="text-sm text-gray-400 mt-1 font-medium">
-            {getMotivation()}
-          </p>
-        </div>
-        <div className="bg-gray-900 px-4 py-2 rounded-xl border border-white/[0.06]">
-          <p className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-            <FiCalendar className="w-4 h-4 text-emerald-400" />
-            {format(new Date(), "EEEE, d MMMM yyyy", { locale: idLocale })}
-          </p>
-        </div>
-      </div>
-
-      {/* 2. STATS CARDS ROW */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
-        {/* Kalori */}
-        <div className="p-5 bg-gray-900 border border-white/[0.06] rounded-2xl hover:-translate-y-[2px] hover:border-white/10 transition-all duration-200">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400">
-                <HiFire className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-semibold text-gray-400">Kalori Hari Ini</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[28px] font-extrabold font-mono tracking-tight text-white">{d.stats.caloriesConsumed}</span>
-              <span className="text-xs font-bold text-gray-500">kkal</span>
-            </div>
-            <div className="text-[10px] font-bold text-gray-600">Target: {d.stats.caloriesTarget} kkal</div>
-          </div>
-        </div>
-
-        {/* Protein */}
-        <div className="p-5 bg-gray-900 border border-white/[0.06] rounded-2xl hover:-translate-y-[2px] hover:border-white/10 transition-all duration-200">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center text-blue-400">
-                <FaDumbbell className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-semibold text-gray-400">Protein</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[28px] font-extrabold font-mono tracking-tight text-white">{d.macros.protein.consumed}</span>
-              <span className="text-xs font-bold text-gray-500">g</span>
-            </div>
-            <div className="text-[10px] font-bold text-gray-600">Target: {d.macros.protein.target} g</div>
-          </div>
-        </div>
-
-        {/* Berat Badan */}
-        <div className="p-5 bg-gray-900 border border-white/[0.06] rounded-2xl hover:-translate-y-[2px] hover:border-white/10 transition-all duration-200">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gray-700 flex items-center justify-center text-gray-400">
-                <FaWeight className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-semibold text-gray-400">Berat Badan</span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[28px] font-extrabold font-mono tracking-tight text-white">{d.stats.currentWeight}</span>
-              <span className="text-xs font-bold text-gray-500">kg</span>
-            </div>
-            <div className={`text-[10px] font-bold ${d.stats.weightChange <= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {d.stats.weightChange > 0 ? '↑' : '↓'} {Math.abs(d.stats.weightChange)} kg dari awal
-            </div>
-          </div>
-        </div>
-
-        {/* Streak */}
-        <div className="p-5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl hover:-translate-y-[2px] hover:shadow-xl hover:shadow-emerald-500/25 transition-all duration-200">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                <HiFire className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-semibold text-white/80">Streak Log</span>
-            </div>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-[28px] font-extrabold font-mono tracking-tight text-white">{d.stats.streakDays}</span>
-            </div>
-            <div className="text-[10px] font-bold text-white/80">hari berturut-turut</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. MAIN CONTENT — SPLIT LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 relative z-10">
         
-        {/* KIRI — Kalori Overview (60%) */}
-        <div className="w-full lg:w-[60%]">
-          <TiltCard className="p-8 glass-panel border border-white/[0.1] rounded-2xl h-full flex flex-col justify-center">
-            <h2 className="text-lg font-bold text-white mb-6">Overview Kalori & Makro</h2>
-            
-            {/* Donut Chart Custom SVG */}
-            <div className="flex justify-center mb-8 relative">
-              <div className="w-[240px] h-[240px] relative">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  {/* Background Circle */}
-                  <circle
-                    cx="50" cy="50" r="40"
-                    fill="none"
-                    stroke="#1f2937"
-                    strokeWidth="12"
-                  />
-                  {/* Progress Circle */}
-                  <circle
-                    cx="50" cy="50" r="40"
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="12"
-                    strokeLinecap="round"
-                    strokeDasharray={`${251.2 * (animatedDasharray / 100)} 251.2`}
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                {/* Center Text */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-extrabold text-white">{calRemaining > 0 ? calRemaining : 0}</span>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Kkal Tersisa</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Macro Bars */}
-            <div className="space-y-5">
-              {[['Protein', d.macros.protein.consumed, d.macros.protein.target, 'bg-blue-500', 'g'],
-                ['Karbohidrat', d.macros.carbs.consumed, d.macros.carbs.target, 'bg-amber-500', 'g'],
-                ['Lemak', d.macros.fat.consumed, d.macros.fat.target, 'bg-red-500', 'g']
-              ].map(([label, consumed, target, color, unit]) => (
-                <div key={String(label)} className="space-y-2">
-                  <div className="flex justify-between text-sm font-semibold">
-                    <span className="text-gray-300">{String(label)}</span>
-                    <span className="text-gray-500">{consumed}{unit} / {target}{unit}</span>
-                  </div>
-                  <div className="h-2.5 bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${String(color)} rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${Math.min((Number(consumed) / Number(target)) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TiltCard>
+        {/* Back to Home Button */}
+        <div className="mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--background-elevated)] border border-[var(--border-color)] text-[var(--foreground)] font-bold text-sm hover:bg-green-500 hover:text-white hover:border-green-500 transition-all">
+            <FiArrowLeft /> Kembali ke Beranda
+          </Link>
         </div>
 
-        {/* KANAN — Quick Actions + Ringkasan (40%) */}
-        <div className="w-full lg:w-[40%] space-y-6">
+        {/* 1. GREETING & PROGRAM STATUS */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-green-500/10 text-green-500 text-[11px] font-black uppercase tracking-[0.2em] border border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                {d.user.programName}
+              </span>
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-[11px] font-black uppercase tracking-[0.2em] border border-blue-500/20">
+                Day {d.user.currentDay} / {d.user.totalDays}
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-[var(--foreground)] tracking-tight leading-tight">
+              {getGreeting()}, <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-400">{d.user.name}</span>! 👋
+            </h1>
+            <p className="text-[var(--muted-foreground)] font-medium mt-4 text-lg max-w-xl">
+              Kemajuan yang konsisten adalah kunci transformasi. Mari kita lihat capaian Anda hari ini.
+            </p>
+          </motion.div>
           
-          {/* Konsultasi Berikutnya */}
-          {d.nextConsultation && (
-          <TiltCard className="p-6 glass-panel border border-white/[0.1] rounded-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-600 rounded-l-2xl" />
-              <h3 className="text-sm font-bold text-white mb-4">Konsultasi Berikutnya</h3>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-brand-100">
-                  <Image src={d.nextConsultation.nutritionistPhoto} alt="Ahli Gizi" fill className="object-cover" />
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex items-center gap-6 bg-[var(--background-elevated)] p-4 rounded-3xl shadow-xl border border-[var(--border-color)] backdrop-blur-xl"
+          >
+            <div className="px-6 py-2 border-r border-[var(--border-color)]">
+              <p className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.2em] mb-2">Streak Aktif</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shadow-inner">
+                  <HiFire size={24} className="animate-pulse" />
                 </div>
-                <div>
-                  <p className="font-bold text-white">{d.nextConsultation.nutritionistName}</p>
-                  <p className="text-xs font-medium text-gray-400">
-                    {format(new Date(d.nextConsultation.date), "dd MMM yyyy", { locale: idLocale })} • {d.nextConsultation.time}
-                  </p>
+                <span className="text-2xl font-black text-[var(--foreground)]">{d.stats.streakDays} Hari</span>
+              </div>
+            </div>
+            <div className="px-6 py-2">
+              <p className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.2em] mb-2">Sisa Program</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-inner">
+                  <FiCalendar size={22} />
+                </div>
+                <span className="text-2xl font-black text-[var(--foreground)]">{d.stats.remainingDays} <span className="text-sm text-[var(--muted-foreground)] font-bold">Hari</span></span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 2. CORE STATS GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            { label: 'Energi Terpakai', val: d.stats.caloriesConsumed, target: d.stats.caloriesTarget, unit: 'kkal', icon: <HiFire size={24} />, color: 'text-orange-500', bg: 'bg-orange-500/10', glow: 'shadow-orange-500/20' },
+            { label: 'Asupan Protein', val: d.macros.protein.consumed, target: d.macros.protein.target, unit: 'g', icon: <FaDumbbell size={24} />, color: 'text-blue-500', bg: 'bg-blue-500/10', glow: 'shadow-blue-500/20' },
+            { label: 'Berat Saat Ini', val: d.stats.currentWeight, change: d.stats.weightChange, unit: 'kg', icon: <FaWeight size={24} />, color: 'text-emerald-500', bg: 'bg-emerald-500/10', glow: 'shadow-emerald-500/20' },
+            { label: 'Progres Target', val: d.weeklyTarget.currentWeightLoss, target: d.weeklyTarget.targetWeightLoss, unit: 'kg', icon: <FiTarget size={24} />, color: 'text-purple-500', bg: 'bg-purple-500/10', glow: 'shadow-purple-500/20' },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + (i * 0.1), duration: 0.6 }}
+            >
+              <TiltCard className="bg-[var(--background-elevated)] p-8 rounded-[2.5rem] border border-[var(--border-color)] shadow-xl hover:shadow-2xl transition-all group overflow-hidden relative">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-full" />
+                
+                <div className="flex items-center gap-4 mb-6 relative z-10">
+                  <div className={`w-14 h-14 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center transition-transform group-hover:scale-110 duration-500 shadow-lg ${stat.glow}`}>
+                    {stat.icon}
+                  </div>
+                  <span className="text-[11px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{stat.label}</span>
+                </div>
+                
+                <div className="flex items-baseline gap-2 relative z-10">
+                  <span className="text-4xl font-black text-[var(--foreground)] tracking-tighter">{stat.val}</span>
+                  <span className="text-sm font-bold text-[var(--muted-foreground)]">{stat.unit}</span>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-[var(--border-color)] relative z-10">
+                  {stat.target ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em]">
+                        <span className="text-[var(--muted-foreground)]">Target: {stat.target}</span>
+                        <span className={stat.color}>{Math.round((stat.val / stat.target) * 100)}%</span>
+                      </div>
+                      <div className="h-2 bg-[var(--background-soft)] rounded-full overflow-hidden p-0.5 border border-[var(--border-color)]">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min((stat.val / stat.target) * 100, 100)}%` }}
+                          transition={{ duration: 1, delay: 0.8 + (i * 0.1) }}
+                          className={`h-full ${stat.color.replace('text', 'bg')} rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
+                        />
+                      </div>
+                    </div>
+                  ) : stat.change !== undefined ? (
+                    <div className="flex items-center gap-2">
+                      <div className={`flex items-center justify-center w-6 h-6 rounded-full ${stat.change <= 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                        {stat.change <= 0 ? '↓' : '↑'}
+                      </div>
+                      <span className={`text-[11px] font-black uppercase tracking-widest ${stat.change <= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {Math.abs(stat.change)} kg <span className="text-[var(--muted-foreground)] lowercase ml-1">dari awal</span>
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
+              </TiltCard>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* 3. MAIN DASHBOARD CONTENT */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* LEFT: CALORIE & MACRO OVERVIEW (7 Columns) */}
+          <div className="lg:col-span-7 space-y-10">
+            <TiltCard className="bg-[var(--background-elevated)] p-12 rounded-[3rem] border border-[var(--border-color)] shadow-2xl relative overflow-hidden group">
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-green-500/10 transition-colors duration-1000" />
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4 relative z-10">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-[var(--foreground)] flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center shadow-inner">
+                      <FiPieChart size={24} />
+                    </div>
+                    Analisis Nutrisi
+                  </h2>
+                  <p className="text-sm font-medium text-[var(--muted-foreground)] ml-14">Data real-time asupan harian Anda</p>
+                </div>
+                <button className="px-6 py-3 rounded-2xl bg-[var(--background-soft)] border border-[var(--border-color)] text-[10px] font-black text-[var(--foreground)] uppercase tracking-[0.2em] hover:bg-green-500 hover:text-white hover:border-green-500 transition-all shadow-sm">
+                  Detail Laporan
+                </button>
+              </div>
+
+              <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
+                {/* Donut Chart with 3D shadow */}
+                <div className="relative w-72 h-72 shrink-0 group/chart">
+                  <div className="absolute inset-0 bg-green-500/5 rounded-full blur-3xl scale-90 group-hover/chart:scale-100 transition-transform duration-700" />
+                  <svg className="w-full h-full -rotate-90 drop-shadow-[0_15px_25px_rgba(0,0,0,0.1)]" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border-color)" strokeWidth="10" />
+                    <motion.circle
+                      cx="50" cy="50" r="42" fill="none"
+                      stroke="url(#greenGradient)" strokeWidth="12" strokeLinecap="round"
+                      initial={{ strokeDasharray: "0 264" }}
+                      animate={{ strokeDasharray: `${264 * (calPercent / 100)} 264` }}
+                      transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                    <defs>
+                      <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#22c55e" />
+                        <stop offset="100%" stopColor="#10b981" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <motion.span 
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 0.8 }}
+                      className="text-6xl font-black text-[var(--foreground)] tracking-tighter"
+                    >
+                      {calRemaining > 0 ? calRemaining : 0}
+                    </motion.span>
+                    <span className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.3em] mt-2">Kkal Sisa</span>
+                  </div>
+                </div>
+
+                {/* Macro Progress Bars */}
+                <div className="flex-grow w-full space-y-8">
+                  {[
+                    { label: 'Karbohidrat', val: d.macros.carbs.consumed, target: d.macros.carbs.target, color: 'bg-amber-500', text: 'text-amber-500', bg: 'bg-amber-500/10' },
+                    { label: 'Protein', val: d.macros.protein.consumed, target: d.macros.protein.target, color: 'bg-blue-500', text: 'text-blue-500', bg: 'bg-blue-500/10' },
+                    { label: 'Lemak', val: d.macros.fat.consumed, target: d.macros.fat.target, color: 'bg-red-500', text: 'text-red-500', bg: 'bg-red-500/10' },
+                  ].map((m, i) => (
+                    <div key={i} className="space-y-3 group/item">
+                      <div className="flex justify-between items-end mb-1">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${m.color}`} />
+                          <span className="text-xs font-black uppercase tracking-[0.2em] text-[var(--foreground)] group-hover/item:text-green-500 transition-colors">{m.label}</span>
+                        </div>
+                        <span className="text-sm font-black text-[var(--foreground)] tracking-tight">
+                          {m.val}g <span className="text-[var(--muted-foreground)] font-bold text-xs">/ {m.target}g</span>
+                        </span>
+                      </div>
+                      <div className="h-3 bg-[var(--background-soft)] rounded-full overflow-hidden border border-[var(--border-color)] p-0.5">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min((m.val / m.target) * 100, 100)}%` }}
+                          transition={{ duration: 1.2, delay: 0.7 + (i * 0.15), ease: "easeOut" }}
+                          className={`h-full ${m.color} rounded-full shadow-[0_0_15px_rgba(0,0,0,0.1)] relative`}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
+                        </motion.div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              {d.nextConsultation.isSoon ? (
-                <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold flex items-center justify-center gap-2 border-none shadow-lg shadow-emerald-500/25">
-                  <FiVideo className="w-4 h-4" /> Bergabung Sekarang
-                </Button>
-              ) : (
-                <Button variant="outline" className="w-full font-bold border-white/10 text-gray-400" disabled>
-                  Belum Waktunya
-                </Button>
-              )}
             </TiltCard>
-          )}
 
-          {/* Log Makan Cepat */}
-          <TiltCard className="p-6 glass-panel border border-white/[0.1] rounded-2xl">
-            <h3 className="text-sm font-bold text-white mb-4">Log Makan Cepat</h3>
-            <div className="flex flex-col gap-3">
-              {[['breakfast','🌅','Sarapan'],['lunch','☀️','Makan Siang'],['dinner','🌙','Makan Malam']].map(([type, emoji, label]) => (
-                <button
-                  key={String(type)}
-                  onClick={() => handleOpenLog(String(type))}
-                  className="w-full flex items-center gap-3 h-13 px-4 py-3.5 rounded-xl bg-gray-800 border border-white/[0.06] text-sm font-semibold text-gray-300 hover:bg-gray-750 hover:border-emerald-500/30 hover:text-white transition-all text-left"
+            {/* Body Composition 3D Integration */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="relative bg-[var(--background-elevated)] rounded-[3rem] border border-[var(--border-color)] overflow-hidden shadow-2xl">
+                <BodyComposition3D />
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: QUICK ACTIONS & CONSULTATION (5 Columns) */}
+          <div className="lg:col-span-5 space-y-10">
+            
+            {/* Consultation Card - Ultra Modern 3D */}
+            {d.nextConsultation && (
+              <TiltCard className="bg-slate-900 p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-slate-300 group">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000" />
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="flex items-center justify-between mb-10 relative z-10">
+                  <span className="px-4 py-1.5 rounded-xl bg-white/10 backdrop-blur-md text-green-400 text-[10px] font-black uppercase tracking-[0.2em] border border-white/10">
+                    Sesi Terjadwal
+                  </span>
+                  {d.nextConsultation.isSoon && (
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+                      <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Sekarang</span>
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-6 mb-10 relative z-10">
+                  <div className="relative w-20 h-20 rounded-3xl overflow-hidden border-2 border-white/20 shadow-2xl group-hover:rotate-3 transition-transform duration-500">
+                    <Image src={d.nextConsultation.nutritionistPhoto} alt="Ahli Gizi" fill className="object-cover" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black tracking-tight">{d.nextConsultation.nutritionistName}</h3>
+                    <p className="text-sm font-bold text-slate-400 mt-1">Spesialis Gizi Klinis</p>
+                    <div className="flex items-center gap-3 mt-4 text-green-400">
+                      <div className="p-1.5 rounded-lg bg-green-500/20"><FiCalendar size={14} /></div>
+                      <p className="text-xs font-black uppercase tracking-widest">
+                        {format(new Date(d.nextConsultation.date), "dd MMM", { locale: idLocale })} • {d.nextConsultation.time}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  className={`w-full h-16 rounded-[1.5rem] font-black text-sm flex items-center justify-center gap-4 transition-all relative z-10 ${
+                    d.nextConsultation.isSoon 
+                      ? 'bg-green-600 hover:bg-green-700 shadow-[0_20px_40px_rgba(22,163,74,0.3)] hover:-translate-y-1' 
+                      : 'bg-white/5 border border-white/10 text-slate-500 cursor-not-allowed'
+                  }`} 
+                  disabled={!d.nextConsultation.isSoon}
                 >
-                  <span className="text-xl">{String(emoji)}</span>
-                  {String(label)}
-                </button>
+                  <FiVideo size={20} className={d.nextConsultation.isSoon ? 'animate-bounce' : ''} /> 
+                  {d.nextConsultation.isSoon ? 'Masuk Ruang Konsultasi' : 'Belum Waktunya'}
+                </Button>
+              </TiltCard>
+            )}
+
+            {/* Quick Food Log - Interactive Cards */}
+            <div className="bg-[var(--background-elevated)] p-10 rounded-[3rem] border border-[var(--border-color)] shadow-xl relative overflow-hidden">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-[var(--muted-foreground)]">Log Harian</h3>
+                <FiPlus className="text-green-500 cursor-pointer hover:rotate-90 transition-transform" size={20} />
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                {[
+                  { id: 'breakfast', label: 'Sarapan', emoji: '🌅', time: '07:00 - 09:00', color: 'hover:border-amber-500/30 hover:bg-amber-500/5' },
+                  { id: 'lunch', label: 'Makan Siang', emoji: '☀️', time: '12:00 - 14:00', color: 'hover:border-blue-500/30 hover:bg-blue-500/5' },
+                  { id: 'dinner', label: 'Makan Malam', emoji: '🌙', time: '18:00 - 20:00', color: 'hover:border-purple-500/30 hover:bg-purple-500/5' },
+                ].map((meal, idx) => (
+                  <motion.button
+                    key={meal.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 + (idx * 0.1) }}
+                    onClick={() => handleOpenLog(meal.id)}
+                    className={`flex items-center justify-between p-6 rounded-[1.75rem] bg-[var(--background-soft)] border border-[var(--border-color)] group transition-all duration-300 ${meal.color}`}
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--background-elevated)] shadow-sm flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-500">
+                        {meal.emoji}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-black text-[var(--foreground)] text-base mb-0.5 group-hover:text-green-600 transition-colors">{meal.label}</p>
+                        <p className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest">{meal.time}</p>
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-[var(--background-elevated)] border border-[var(--border-color)] flex items-center justify-center text-[var(--muted-foreground)] group-hover:bg-green-600 group-hover:text-white group-hover:border-green-600 group-hover:shadow-lg transition-all">
+                      <FiPlus size={20} />
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Stats - Micro Cards */}
+            <div className="grid grid-cols-2 gap-6">
+              {[
+                { label: 'Water', val: '2.5L', icon: <FiActivity />, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                { label: 'Steps', val: '8.4k', icon: <FiTrendingUp />, color: 'text-green-500', bg: 'bg-green-500/10' },
+              ].map((m, i) => (
+                <div key={i} className="bg-[var(--background-elevated)] p-6 rounded-[2rem] border border-[var(--border-color)] shadow-lg group hover:-translate-y-1 transition-all">
+                  <div className={`w-10 h-10 rounded-xl ${m.bg} ${m.color} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
+                    {m.icon}
+                  </div>
+                  <p className="text-xl font-black text-[var(--foreground)]">{m.val}</p>
+                  <p className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-widest">{m.label}</p>
+                </div>
               ))}
             </div>
-          </TiltCard>
 
-          {/* Target Minggu Ini */}
-          <TiltCard className="p-6 glass-panel border border-white/[0.1] rounded-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <FiTarget className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-bold text-white">Target Minggu Ini</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-gray-400">Penurunan Berat Badan</span>
-                <span className="text-white">{d.weeklyTarget.currentWeightLoss}kg / {d.weeklyTarget.targetWeightLoss}kg</span>
-              </div>
-              <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                  style={{ width: `${Math.min((d.weeklyTarget.currentWeightLoss / d.weeklyTarget.targetWeightLoss) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-gray-600 font-medium text-center">
-                Tetap konsisten untuk mencapai target mingguanmu!
-              </p>
-            </div>
-          </TiltCard>
-
-          <TiltCard className="p-6 rounded-2xl border border-emerald-400/30 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20">
-            <h3 className="text-sm font-bold text-white mb-3">Gamifikasi Mingguan</h3>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-xl bg-white/10 px-2 py-3">
-                <p className="text-2xl">🔥</p>
-                <p className="text-xs text-emerald-200 mt-1">Streak 7 Hari</p>
-              </div>
-              <div className="rounded-xl bg-white/10 px-2 py-3">
-                <p className="text-2xl">🏅</p>
-                <p className="text-xs text-emerald-200 mt-1">Badge Konsisten</p>
-              </div>
-              <div className="rounded-xl bg-white/10 px-2 py-3">
-                <p className="text-2xl">🎯</p>
-                <p className="text-xs text-emerald-200 mt-1">Target 80%</p>
-              </div>
-            </div>
-          </TiltCard>
-
+          </div>
         </div>
+
+        {/* 4. WEEKLY PERFORMANCE - STAGGERED LIST */}
+        <section className="pt-8 relative">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner">
+                <FiActivity size={24} />
+              </div>
+              <h2 className="text-2xl font-black text-[var(--foreground)] tracking-tight">Performa Mingguan</h2>
+            </div>
+            <span className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.3em]">Mei 2026</span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { label: 'Streak Terpanjang', val: '14 Hari', icon: '🔥', color: 'bg-orange-500/10 text-orange-500', glow: 'shadow-orange-500/10' },
+              { label: 'Rata-rata Kalori', val: '1,720', icon: '📊', color: 'bg-green-500/10 text-green-500', glow: 'shadow-green-500/10' },
+              { label: 'Badge Diperoleh', val: '5 Badge', icon: '🏅', color: 'bg-purple-500/10 text-purple-500', glow: 'shadow-purple-500/10' },
+              { label: 'Poin Kesehatan', val: '1,250 XP', icon: '💎', color: 'bg-blue-500/10 text-blue-500', glow: 'shadow-blue-500/10' },
+            ].map((perf, i) => (
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-[var(--background-elevated)] p-8 rounded-[2.5rem] border border-[var(--border-color)] shadow-xl text-center group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden"
+              >
+                <div className={`w-16 h-16 rounded-2xl ${perf.color} flex items-center justify-center text-3xl mx-auto mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500 shadow-lg ${perf.glow}`}>
+                  {perf.icon}
+                </div>
+                <p className="text-2xl font-black text-[var(--foreground)] mb-1 tracking-tight group-hover:text-green-500 transition-colors">{perf.val}</p>
+                <p className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{perf.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
       </div>
 
+      {/* MODALS & OVERLAYS */}
       <FoodSearchModal 
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 

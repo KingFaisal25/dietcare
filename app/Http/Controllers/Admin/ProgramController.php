@@ -54,4 +54,46 @@ class ProgramController extends Controller
             'program' => $program->fresh(),
         ]);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'              => 'required|string|max:255',
+            'slug'              => 'required|string|max:255|unique:programs,slug',
+            'description'       => 'required|string',
+            'price'             => 'required|numeric|min:0',
+            'duration_days'     => 'required|integer|min:1',
+            'max_consultations' => 'required|integer|min:1',
+            'features'          => 'nullable|array',
+            'features.*'        => 'string|max:255',
+            'is_active'         => 'boolean',
+        ]);
+
+        // Ensure slug is properly formatted
+        $validated['slug'] = Str::slug($validated['slug']);
+
+        $program = Program::create($validated);
+
+        // Clear public caches
+        Cache::forget('public_programs');
+
+        return response()->json([
+            'message' => 'Program created successfully',
+            'program' => $program,
+        ], 201);
+    }
+
+    public function destroy($id)
+    {
+        $program = Program::findOrFail($id);
+        $program->delete();
+
+        // Clear public caches
+        Cache::forget('public_programs');
+        Cache::forget("program_{$program->slug}");
+
+        return response()->json([
+            'message' => 'Program deleted successfully',
+        ]);
+    }
 }

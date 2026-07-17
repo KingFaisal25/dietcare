@@ -19,10 +19,10 @@ use App\Http\Controllers\Api\FoodController;
 use App\Http\Controllers\Api\DiaryController;
 use App\Http\Controllers\Shop\ShopProductController;
 use App\Http\Controllers\Shop\ShopOrderController;
+use App\Http\Controllers\PublicFreeToolsController;
 
 // Public Routes (No Auth Needed)
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:api-login');
+// Login, register, logout are in routes/web.php (web middleware for Sanctum SPA sessions)
 
 // Food Database Public Search
 Route::get('/foods/search', [FoodController::class, 'search']);
@@ -33,6 +33,26 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middle
 
 // Public Calculator (No Auth Needed)
 Route::post('/calculate/bmi', [NutritionCalculatorController::class, 'calculateBMI']);
+
+// Public Free Tools (No Auth Needed) — For Viral Marketing
+Route::prefix('public/calculate')->middleware('throttle:60,1')->group(function () {
+    Route::post('/complete', [PublicFreeToolsController::class, 'calculateComplete']);
+    Route::post('/calorie-burn', [PublicFreeToolsController::class, 'calculateCalorieBurn']);
+    Route::post('/water-intake', [PublicFreeToolsController::class, 'calculateWaterIntake']);
+    Route::post('/meal-plan', [PublicFreeToolsController::class, 'generateMealPlan']);
+
+    // Phase 2 Viral Features
+    Route::post('/metabolic-age', [PublicFreeToolsController::class, 'calculateMetabolicAge']);
+    Route::post('/fasting-plan', [PublicFreeToolsController::class, 'planFasting']);
+    Route::post('/budget-diet', [PublicFreeToolsController::class, 'budgetDiet']);
+    Route::post('/cheat-meal', [PublicFreeToolsController::class, 'checkCheatMeal']);
+
+    // Phase 3 Viral Features
+    Route::post('/recipe-generator', [PublicFreeToolsController::class, 'generateRecipe']);
+});
+
+Route::get('public/foods/search-local', [PublicFreeToolsController::class, 'searchFoodLocal']);
+Route::get('public/foods/jajanan', [PublicFreeToolsController::class, 'searchJajanan']);
 
 // Public Program Routes (No Auth Needed)
 Route::prefix('public/programs')->group(function () {
@@ -65,7 +85,6 @@ Route::middleware('throttle:api-public-read')->group(function () {
 
 // Authenticated Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
     // Profile Routes
@@ -109,6 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index']);
         Route::patch('/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
         Route::patch('/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy']);
         Route::get('/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
     });
 
@@ -137,11 +157,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/status/{id}', [\App\Http\Controllers\Api\MealPlanController::class, 'status']);
         Route::get('/history', [\App\Http\Controllers\Api\MealPlanController::class, 'history']);
         Route::get('/{id}', [\App\Http\Controllers\Api\MealPlanController::class, 'show']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\MealPlanController::class, 'destroy']);
     });
 
 
     // Admin Only Routes
-    Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
         // Admin Profile
         Route::put('/profile', [\App\Http\Controllers\Admin\AdminProfileController::class, 'update']);
 
@@ -155,7 +176,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Users
         Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index']);
         Route::get('/users/{id}', [\App\Http\Controllers\Admin\UserController::class, 'show']);
-        Route::put('/users/{id}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole']);
+        Route::put('/users/{id}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])
+            ->middleware('prevent_role_escalation');
         Route::post('/users/{id}/deactivate', [\App\Http\Controllers\Admin\UserController::class, 'deactivate']);
         Route::post('/users/nutritionist', [\App\Http\Controllers\Admin\UserController::class, 'storeNutritionist']);
 
@@ -168,8 +190,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Programs
         Route::get('/programs', [\App\Http\Controllers\Admin\ProgramController::class, 'index']);
+        Route::post('/programs', [\App\Http\Controllers\Admin\ProgramController::class, 'store']);
         Route::get('/programs/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'show']);
         Route::put('/programs/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'update']);
+        Route::delete('/programs/{id}', [\App\Http\Controllers\Admin\ProgramController::class, 'destroy']);
         Route::put('/programs/{id}/packages', [\App\Http\Controllers\Admin\ProgramController::class, 'updatePackages']);
 
         // Blog
@@ -214,7 +238,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Nutritionist Only Routes
-    Route::prefix('nutritionist')->middleware('nutritionist')->group(function () {
+    Route::prefix('nutritionist')->middleware('role:nutritionist')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Nutritionist\DashboardController::class, 'index']);
         Route::get('/profile', [\App\Http\Controllers\NutritionistProfileController::class, 'getProfile']);
         Route::put('/profile', [\App\Http\Controllers\NutritionistProfileController::class, 'updateProfile']);
         Route::post('/profile/photo', [\App\Http\Controllers\NutritionistProfileController::class, 'uploadPhoto']);
@@ -234,11 +259,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Client Only Routes
-    Route::prefix('client')->middleware('client')->group(function () {
+    Route::prefix('client')->middleware('role:patient')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Client\DashboardController::class, 'index']);
         Route::post('/onboarding', [NutritionCalculatorController::class, 'onboarding']);
-        Route::put('/profile/recalculate', [NutritionCalculatorController::class, 'recalculate']);
-        Route::get('/profile', [NutritionCalculatorController::class, 'getProfile']);
+        Route::put('/nutrition-profile/recalculate', [NutritionCalculatorController::class, 'recalculate']);
+        Route::get('/nutrition-profile', [NutritionCalculatorController::class, 'getProfile']);
         Route::get('/progress/alert', [NutritionCalculatorController::class, 'progressAlert']);
         Route::get('/meal-plan', [ClientNutritionController::class, 'mealPlan']);
         Route::get('/food-diary', [ClientNutritionController::class, 'foodDiary']);

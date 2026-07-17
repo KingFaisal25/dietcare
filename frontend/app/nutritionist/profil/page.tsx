@@ -7,8 +7,12 @@ import "react-image-crop/dist/ReactCrop.css";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Toast } from "@/components/ui/Toast";
-import { Camera, Plus, X, Trash2 } from "lucide-react";
+import {
+  Camera, Plus, X, Trash2, Award, Briefcase, Calendar,
+  Bell, FileText, MapPin, User, Save, RefreshCw
+} from "lucide-react";
 import api from "@/lib/api";
+import gsap from "gsap";
 
 const SPECIALIZATIONS = [
   "Penurunan BB",
@@ -23,10 +27,17 @@ const SPECIALIZATIONS = [
 
 const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
+type ActiveTab = "dasar" | "bio" | "pendidikan" | "jadwal" | "notifikasi";
+
 export default function ProfilAhliGiziPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("dasar");
+
+  // Refs for animations
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -63,6 +74,28 @@ export default function ProfilAhliGiziPage() {
     fetchProfile();
   }, []);
 
+  // GSAP Entrance Animation
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      gsap.fromTo(
+        containerRef.current.querySelectorAll(".animate-fade-in"),
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power3.out" }
+      );
+    }
+  }, [loading]);
+
+  // Animate tab switches
+  useEffect(() => {
+    if (contentRef.current) {
+      gsap.fromTo(
+        contentRef.current,
+        { opacity: 0, x: 20 },
+        { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" }
+      );
+    }
+  }, [activeTab]);
+
   const fetchProfile = async () => {
     try {
       const res = await api.get("/nutritionist/profile");
@@ -90,7 +123,10 @@ export default function ProfilAhliGiziPage() {
       if (serverSchedules && serverSchedules.length > 0) {
         setSchedules(
           DAYS.map((day) => {
-            const existing = serverSchedules.find((s: { day_of_week: string; is_active: boolean; start_time: string; end_time: string }) => s.day_of_week === day);
+            const existing = serverSchedules.find(
+              (s: { day_of_week: string; is_active: boolean; start_time: string; end_time: string }) =>
+                s.day_of_week === day
+            );
             return existing
               ? {
                   day_of_week: existing.day_of_week,
@@ -185,413 +221,551 @@ export default function ProfilAhliGiziPage() {
     }));
   };
 
-  if (loading) return <div className="p-8 text-center">Memuat profil...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin" />
+        <p className="text-slate-400 font-bold italic">Memuat profil profesional...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div ref={containerRef} className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-8">
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Profil</h1>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Menyimpan..." : "Simpan Profil"}
-        </Button>
+      {/* Header Panel */}
+      <div className="animate-fade-in flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-5">
+          <div className="relative group w-20 h-20 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex-shrink-0">
+            {photoUrl ? (
+              <Image
+                src={photoUrl}
+                alt="Profile"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                <Camera className="w-8 h-8" />
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all text-white"
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={onSelectFile}
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 leading-tight">
+              {formData.name || "Ahli Gizi"} {formData.title && `, ${formData.title}`}
+            </h1>
+            <p className="text-slate-400 text-sm font-medium mt-1">
+              STR: {formData.str_number || "Belum dimasukkan"} • {formData.years_experience} Tahun Pengalaman
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="h-12 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-100 flex items-center gap-2"
+          >
+            {saving ? (
+              <>
+                <RefreshCw className="animate-spin w-4 h-4" /> Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" /> Simpan Profil
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      <div className="space-y-8">
-        {/* 1. FOTO PROFIL */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Foto Profil</h2>
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-200 overflow-hidden flex-shrink-0">
-              {photoUrl ? (
-                <Image src={photoUrl} alt="Profile" width={96} height={96} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <Camera className="w-8 h-8" />
-                </div>
-              )}
-            </div>
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={onSelectFile}
-              />
-              <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                Ubah Foto
-              </Button>
-              <p className="text-xs text-gray-500 mt-2">Rekomendasi rasio 1:1, max 2MB.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* 2. INFORMASI DASAR */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Informasi Dasar</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Nama Lengkap</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Gelar</label>
-              <Input
-                placeholder="Contoh: S.Gz, M.Gz"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Nomor STR <span className="text-red-500">*</span></label>
-              <Input
-                required
-                value={formData.str_number}
-                onChange={(e) => setFormData({ ...formData, str_number: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Nomor HP / WA</label>
-              <Input
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Email Profesional</label>
-              <Input
-                type="email"
-                disabled
-                value={formData.email}
-              />
-              <p className="text-xs text-gray-500">Email tidak dapat diubah</p>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. BIO & SPESIALISASI */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Bio & Keahlian</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">Bio Singkat</label>
-              <textarea
-                className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                rows={4}
-                maxLength={500}
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              />
-              <div className="text-right text-xs text-gray-500 mt-1">
-                {formData.bio.length} / 500
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Pengalaman (Tahun)</label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={formData.years_experience}
-                  onChange={(e) => setFormData({ ...formData, years_experience: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Kota Praktik</label>
-                <Input
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Spesialisasi</label>
-              <div className="flex flex-wrap gap-2">
-                {SPECIALIZATIONS.map((spec) => {
-                  const isSelected = formData.specializations.includes(spec);
-                  return (
-                    <button
-                      key={spec}
-                      onClick={() => toggleSpecialization(spec)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                        isSelected
-                          ? "bg-green-50 border-green-500 text-green-700"
-                          : "bg-white border-gray-200 text-gray-600 hover:border-green-300"
-                      }`}
-                    >
-                      {spec}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. PENDIDIKAN & SERTIFIKASI */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Pendidikan & Sertifikasi</h2>
-          
-          {/* Pendidikan */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-gray-700">Pendidikan</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    education: [...prev.education, { degree: "", institution: "", year: "" }],
-                  }))
-                }
+      {/* Main Configuration Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Navigation Sidebar */}
+        <div className="animate-fade-in lg:col-span-4 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-5 space-y-2">
+          <span className="block px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Pengaturan Profil
+          </span>
+          {[
+            { id: "dasar", label: "Informasi Dasar", icon: <User className="w-4 h-4" /> },
+            { id: "bio", label: "Bio & Keahlian", icon: <Briefcase className="w-4 h-4" /> },
+            { id: "pendidikan", label: "Pendidikan & Sertifikat", icon: <Award className="w-4 h-4" /> },
+            { id: "jadwal", label: "Jadwal Praktik", icon: <Calendar className="w-4 h-4" /> },
+            { id: "notifikasi", label: "Notifikasi", icon: <Bell className="w-4 h-4" /> },
+          ].map((tab) => {
+            const isAct = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as ActiveTab)}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold text-left transition-all ${
+                  isAct
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-100"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                }`}
               >
-                <Plus className="w-4 h-4 mr-1" /> Tambah
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {formData.education.map((edu, index) => (
-                <div key={index} className="flex gap-2 items-start">
-                  <Input
-                    placeholder="Jenjang (S1 Gizi)"
-                    value={edu.degree}
-                    onChange={(e) => {
-                      const newEdu = [...formData.education];
-                      newEdu[index].degree = e.target.value;
-                      setFormData({ ...formData, education: newEdu });
-                    }}
-                  />
-                  <Input
-                    placeholder="Institusi"
-                    value={edu.institution}
-                    onChange={(e) => {
-                      const newEdu = [...formData.education];
-                      newEdu[index].institution = e.target.value;
-                      setFormData({ ...formData, education: newEdu });
-                    }}
-                  />
-                  <Input
-                    placeholder="Tahun"
-                    className="w-24"
-                    value={edu.year}
-                    onChange={(e) => {
-                      const newEdu = [...formData.education];
-                      newEdu[index].year = e.target.value;
-                      setFormData({ ...formData, education: newEdu });
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const newEdu = formData.education.filter((_, i) => i !== index);
-                      setFormData({ ...formData, education: newEdu });
-                    }}
-                    className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg border border-transparent"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
-              {formData.education.length === 0 && (
-                <p className="text-sm text-gray-500 italic">Belum ada riwayat pendidikan.</p>
-              )}
-            </div>
-          </div>
+                {tab.icon}
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Sertifikasi */}
-          <div>
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-gray-700">Sertifikasi</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    certifications: [...prev.certifications, { name: "", institution: "", year: "" }],
-                  }))
-                }
-              >
-                <Plus className="w-4 h-4 mr-1" /> Tambah
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {formData.certifications.map((cert, index) => (
-                <div key={index} className="flex gap-2 items-start">
-                  <Input
-                    placeholder="Nama Sertifikasi"
-                    value={cert.name}
-                    onChange={(e) => {
-                      const newCert = [...formData.certifications];
-                      newCert[index].name = e.target.value;
-                      setFormData({ ...formData, certifications: newCert });
-                    }}
-                  />
-                  <Input
-                    placeholder="Lembaga"
-                    value={cert.institution}
-                    onChange={(e) => {
-                      const newCert = [...formData.certifications];
-                      newCert[index].institution = e.target.value;
-                      setFormData({ ...formData, certifications: newCert });
-                    }}
-                  />
-                  <Input
-                    placeholder="Tahun"
-                    className="w-24"
-                    value={cert.year}
-                    onChange={(e) => {
-                      const newCert = [...formData.certifications];
-                      newCert[index].year = e.target.value;
-                      setFormData({ ...formData, certifications: newCert });
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const newCert = formData.certifications.filter((_, i) => i !== index);
-                      setFormData({ ...formData, certifications: newCert });
-                    }}
-                    className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg border border-transparent"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+        {/* Content Panel */}
+        <div className="animate-fade-in lg:col-span-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 min-h-[500px]">
+          <div ref={contentRef} className="space-y-6">
+            {/* TABS IMPLEMENTATION */}
+            {activeTab === "dasar" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Informasi Dasar</h3>
+                  <p className="text-xs text-slate-400 font-medium">Informasi identitas profesional utama Anda</p>
                 </div>
-              ))}
-              {formData.certifications.length === 0 && (
-                <p className="text-sm text-gray-500 italic">Belum ada sertifikasi.</p>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* 5. JADWAL KETERSEDIAAN */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Jadwal Ketersediaan</h2>
-          <p className="text-sm text-gray-500 mb-6">Tentukan jadwal reguler kapan Anda tersedia untuk konsultasi.</p>
-          
-          <div className="space-y-4">
-            {schedules.map((schedule, index) => (
-              <div key={schedule.day_of_week} className="flex items-center gap-4">
-                <div className="w-32 flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={schedule.is_active}
-                    onChange={(e) => {
-                      const newSchedules = [...schedules];
-                      newSchedules[index].is_active = e.target.checked;
-                      setSchedules(newSchedules);
-                    }}
-                    className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                  />
-                  <span className={`font-medium ${schedule.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
-                    {schedule.day_of_week}
-                  </span>
-                </div>
-                
-                {schedule.is_active ? (
-                  <div className="flex items-center gap-2">
+                <hr className="border-slate-100" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Nama Lengkap
+                    </label>
                     <Input
-                      type="time"
-                      className="w-32"
-                      value={schedule.start_time}
-                      onChange={(e) => {
-                        const newSchedules = [...schedules];
-                        newSchedules[index].start_time = e.target.value;
-                        setSchedules(newSchedules);
-                      }}
-                    />
-                    <span className="text-gray-500">-</span>
-                    <Input
-                      type="time"
-                      className="w-32"
-                      value={schedule.end_time}
-                      onChange={(e) => {
-                        const newSchedules = [...schedules];
-                        newSchedules[index].end_time = e.target.value;
-                        setSchedules(newSchedules);
-                      }}
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Masukkan nama lengkap"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm text-slate-900"
                     />
                   </div>
-                ) : (
-                  <span className="text-sm text-gray-400 italic">Libur</span>
-                )}
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Gelar Akademik
+                    </label>
+                    <Input
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      placeholder="Contoh: S.Gz, M.Gz"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm text-slate-900"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Nomor STR <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      required
+                      value={formData.str_number}
+                      onChange={(e) => setFormData({ ...formData, str_number: e.target.value })}
+                      placeholder="16-digit nomor STR"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm text-slate-900 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      No. WhatsApp
+                    </label>
+                    <Input
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="Contoh: 0812xxxxxxxx"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm text-slate-900"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Email Profesional
+                    </label>
+                    <Input
+                      type="email"
+                      disabled
+                      value={formData.email}
+                      className="h-12 bg-slate-100 border-slate-200 rounded-xl text-sm text-slate-500 cursor-not-allowed"
+                    />
+                    <p className="text-[10px] text-slate-400 font-bold italic">
+                      * Email akun utama tidak dapat diubah demi keamanan akun SaaS Anda.
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
+            )}
+
+            {activeTab === "bio" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Bio & Keahlian</h3>
+                  <p className="text-xs text-slate-400 font-medium">Beri tahu klien mengenai latar belakang keahlian Anda</p>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Bio Singkat (Maks 500 karakter)
+                  </label>
+                  <textarea
+                    rows={4}
+                    maxLength={500}
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    placeholder="Tulis bio singkat di sini..."
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none leading-relaxed"
+                  />
+                  <p className="text-right text-[10px] text-slate-400 font-bold">
+                    {formData.bio.length} / 500
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Pengalaman Kerja (Tahun)
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.years_experience}
+                      onChange={(e) =>
+                        setFormData({ ...formData, years_experience: parseInt(e.target.value) || 0 })
+                      }
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      Kota Praktik
+                    </label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="Contoh: Jakarta"
+                      className="h-12 bg-slate-50 border-slate-200 rounded-xl text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Spesialisasi Fokus Gizi
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {SPECIALIZATIONS.map((spec) => {
+                      const isSelected = formData.specializations.includes(spec);
+                      return (
+                        <button
+                          key={spec}
+                          type="button"
+                          onClick={() => toggleSpecialization(spec)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                            isSelected
+                              ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-100"
+                              : "bg-slate-50 border-slate-200 text-slate-500 hover:border-emerald-300 hover:bg-white"
+                          }`}
+                        >
+                          {spec}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "pendidikan" && (
+              <div className="space-y-8">
+                {/* Pendidikan Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900">Riwayat Pendidikan</h3>
+                      <p className="text-xs text-slate-400 font-medium">Riwayat studi akademik gizi Anda</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          education: [...prev.education, { degree: "", institution: "", year: "" }],
+                        }))
+                      }
+                      className="rounded-xl font-bold border-slate-200 h-10 px-4 text-emerald-600 hover:bg-emerald-50/50"
+                    >
+                      <Plus className="w-4 h-4 mr-1.5" /> Tambah
+                    </Button>
+                  </div>
+                  <hr className="border-slate-100" />
+                  <div className="space-y-3">
+                    {formData.education.map((edu, index) => (
+                      <div key={index} className="flex gap-3 items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <Input
+                          placeholder="S1 Ilmu Gizi"
+                          value={edu.degree}
+                          onChange={(e) => {
+                            const newEdu = [...formData.education];
+                            newEdu[index].degree = e.target.value;
+                            setFormData({ ...formData, education: newEdu });
+                          }}
+                          className="h-11 bg-white border-slate-200 rounded-lg text-xs"
+                        />
+                        <Input
+                          placeholder="Universitas"
+                          value={edu.institution}
+                          onChange={(e) => {
+                            const newEdu = [...formData.education];
+                            newEdu[index].institution = e.target.value;
+                            setFormData({ ...formData, education: newEdu });
+                          }}
+                          className="h-11 bg-white border-slate-200 rounded-lg text-xs"
+                        />
+                        <Input
+                          placeholder="Tahun"
+                          className="w-24 h-11 bg-white border-slate-200 rounded-lg text-xs text-center"
+                          value={edu.year}
+                          onChange={(e) => {
+                            const newEdu = [...formData.education];
+                            newEdu[index].year = e.target.value;
+                            setFormData({ ...formData, education: newEdu });
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newEdu = formData.education.filter((_, i) => i !== index);
+                            setFormData({ ...formData, education: newEdu });
+                          }}
+                          className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    {formData.education.length === 0 && (
+                      <p className="text-xs text-slate-400 font-bold italic text-center py-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                        Belum ada riwayat pendidikan terdaftar.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sertifikasi Section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900">Sertifikasi & Pelatihan</h3>
+                      <p className="text-xs text-slate-400 font-medium">Sertifikat profesional yang menunjang kredibilitas</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          certifications: [...prev.certifications, { name: "", institution: "", year: "" }],
+                        }))
+                      }
+                      className="rounded-xl font-bold border-slate-200 h-10 px-4 text-emerald-600 hover:bg-emerald-50/50"
+                    >
+                      <Plus className="w-4 h-4 mr-1.5" /> Tambah
+                    </Button>
+                  </div>
+                  <hr className="border-slate-100" />
+                  <div className="space-y-3">
+                    {formData.certifications.map((cert, index) => (
+                      <div key={index} className="flex gap-3 items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <Input
+                          placeholder="Certified Sports Nutritionist"
+                          value={cert.name}
+                          onChange={(e) => {
+                            const newCert = [...formData.certifications];
+                            newCert[index].name = e.target.value;
+                            setFormData({ ...formData, certifications: newCert });
+                          }}
+                          className="h-11 bg-white border-slate-200 rounded-lg text-xs"
+                        />
+                        <Input
+                          placeholder="Lembaga Sertifikasi"
+                          value={cert.institution}
+                          onChange={(e) => {
+                            const newCert = [...formData.certifications];
+                            newCert[index].institution = e.target.value;
+                            setFormData({ ...formData, certifications: newCert });
+                          }}
+                          className="h-11 bg-white border-slate-200 rounded-lg text-xs"
+                        />
+                        <Input
+                          placeholder="Tahun"
+                          className="w-24 h-11 bg-white border-slate-200 rounded-lg text-xs text-center"
+                          value={cert.year}
+                          onChange={(e) => {
+                            const newCert = [...formData.certifications];
+                            newCert[index].year = e.target.value;
+                            setFormData({ ...formData, certifications: newCert });
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCert = formData.certifications.filter((_, i) => i !== index);
+                            setFormData({ ...formData, certifications: newCert });
+                          }}
+                          className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    {formData.certifications.length === 0 && (
+                      <p className="text-xs text-slate-400 font-bold italic text-center py-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                        Belum ada sertifikasi terdaftar.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "jadwal" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Jadwal Praktik Konsultasi</h3>
+                  <p className="text-xs text-slate-400 font-medium">Tentukan hari & jam operasional ketersediaan konsultasi reguler Anda</p>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="space-y-4">
+                  {schedules.map((schedule, index) => (
+                    <div
+                      key={schedule.day_of_week}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          id={`schedule-active-${schedule.day_of_week}`}
+                          type="checkbox"
+                          checked={schedule.is_active}
+                          onChange={(e) => {
+                            const newSchedules = [...schedules];
+                            newSchedules[index].is_active = e.target.checked;
+                            setSchedules(newSchedules);
+                          }}
+                          className="w-5 h-5 rounded border-slate-200 text-emerald-500 focus:ring-emerald-500 accent-emerald-500"
+                        />
+                        <label
+                          htmlFor={`schedule-active-${schedule.day_of_week}`}
+                          className={`text-sm font-black cursor-pointer ${
+                            schedule.is_active ? "text-slate-900" : "text-slate-400"
+                          }`}
+                        >
+                          {schedule.day_of_week}
+                        </label>
+                      </div>
+
+                      {schedule.is_active ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="time"
+                            className="w-28 h-10 bg-white border-slate-200 rounded-lg text-xs"
+                            value={schedule.start_time}
+                            onChange={(e) => {
+                              const newSchedules = [...schedules];
+                              newSchedules[index].start_time = e.target.value;
+                              setSchedules(newSchedules);
+                            }}
+                          />
+                          <span className="text-slate-400 font-bold">-</span>
+                          <Input
+                            type="time"
+                            className="w-28 h-10 bg-white border-slate-200 rounded-lg text-xs"
+                            value={schedule.end_time}
+                            onChange={(e) => {
+                              const newSchedules = [...schedules];
+                              newSchedules[index].end_time = e.target.value;
+                              setSchedules(newSchedules);
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-bold italic bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                          Tutup / Libur
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === "notifikasi" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Pengaturan Notifikasi</h3>
+                  <p className="text-xs text-slate-400 font-medium">Kelola bagaimana Anda menerima notifikasi aktivitas dari platform SaaS</p>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="space-y-4">
+                  {[
+                    {
+                      key: "notif_new_message" as const,
+                      title: "Notifikasi Pesan Klien Baru",
+                      desc: "Kirim email notifikasi ketika ada chat masuk dari klien baru Anda.",
+                    },
+                    {
+                      key: "notif_new_consultation" as const,
+                      title: "Jadwal Sesi Konsultasi Baru",
+                      desc: "Beri tahu saya ketika klien memesan sesi jadwal video-call/konsultasi baru.",
+                    },
+                    {
+                      key: "notif_reminder" as const,
+                      title: "Pengingat Jadwal Konsultasi",
+                      desc: "Kirim notifikasi pengingat 1 jam sebelum sesi konsultasi video dimulai.",
+                    },
+                  ].map((notif) => (
+                    <label
+                      key={notif.key}
+                      className="flex gap-4 items-start p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData[notif.key]}
+                        onChange={(e) => setFormData({ ...formData, [notif.key]: e.target.checked })}
+                        className="w-5 h-5 rounded border-slate-200 text-emerald-500 accent-emerald-500 shrink-0 mt-0.5"
+                      />
+                      <div className="space-y-1">
+                        <p className="text-sm font-black text-slate-900">{notif.title}</p>
+                        <p className="text-xs text-slate-500 leading-relaxed font-medium">{notif.desc}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </section>
-
-        {/* 6. PENGATURAN NOTIFIKASI */}
-        <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Pengaturan Notifikasi</h2>
-          
-          <div className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.notif_new_message}
-                onChange={(e) => setFormData({ ...formData, notif_new_message: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">Notifikasi Pesan Baru</p>
-                <p className="text-sm text-gray-500">Terima email saat klien mengirim pesan baru.</p>
-              </div>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.notif_new_consultation}
-                onChange={(e) => setFormData({ ...formData, notif_new_consultation: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">Jadwal Konsultasi Baru</p>
-                <p className="text-sm text-gray-500">Terima notifikasi saat ada klien menjadwalkan konsultasi.</p>
-              </div>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.notif_reminder}
-                onChange={(e) => setFormData({ ...formData, notif_reminder: e.target.checked })}
-                className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <div>
-                <p className="font-medium text-gray-900">Pengingat Konsultasi</p>
-                <p className="text-sm text-gray-500">Pengingat 1 jam sebelum jadwal konsultasi dimulai.</p>
-              </div>
-            </label>
-          </div>
-        </section>
-
+        </div>
       </div>
 
       {/* Crop Modal */}
       {showCropModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold">Potong Foto Profil</h3>
-              <button onClick={() => setShowCropModal(false)} className="text-gray-500 hover:text-gray-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden flex flex-col border border-slate-100">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="font-black text-slate-900 text-base">Potong Foto Profil</h3>
+              <button
+                onClick={() => setShowCropModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 flex-grow overflow-auto flex justify-center bg-gray-100">
+            <div className="p-6 flex-grow overflow-auto flex justify-center bg-slate-100/50 min-h-[300px]">
               <ReactCrop
                 crop={crop}
                 onChange={(c) => setCrop(c)}
@@ -602,15 +776,26 @@ export default function ProfilAhliGiziPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   ref={imgRef}
-                  src={typeof upImg === 'string' ? upImg : ''}
+                  src={typeof upImg === "string" ? upImg : ""}
                   alt="Upload preview"
-                  className="max-h-96 object-contain"
+                  className="max-h-80 object-contain rounded-xl"
                 />
               </ReactCrop>
             </div>
-            <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCropModal(false)}>Batal</Button>
-              <Button onClick={uploadPhoto}>Simpan Foto</Button>
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowCropModal(false)}
+                className="rounded-xl font-bold border-slate-200"
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={uploadPhoto}
+                className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-5"
+              >
+                Simpan Foto
+              </Button>
             </div>
           </div>
         </div>

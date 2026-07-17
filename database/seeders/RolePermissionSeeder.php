@@ -20,7 +20,7 @@ class RolePermissionSeeder extends Seeder
         // Create Roles
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $nutritionistRole = Role::firstOrCreate(['name' => 'nutritionist']);
-        $clientRole = Role::firstOrCreate(['name' => 'client']);
+        $clientRole = Role::firstOrCreate(['name' => 'patient']);
 
         // Define Permissions
         $permissions = [

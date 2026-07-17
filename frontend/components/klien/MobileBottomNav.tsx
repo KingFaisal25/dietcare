@@ -3,14 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiHome, FiBookOpen, FiMessageSquare, FiTrendingUp, FiUser } from "react-icons/fi";
+import { FiHome, FiBookOpen, FiMessageSquare, FiTrendingUp, FiShoppingBag } from "react-icons/fi";
 
 const NAV_ITEMS = [
   { href: "/klien-dashboard", label: "Home",     icon: FiHome },
+  { href: "/shop",            label: "Shop",     icon: FiShoppingBag },
   { href: "/diary",           label: "Diary",    icon: FiBookOpen },
   { href: "/konsultasi",      label: "Chat",     icon: FiMessageSquare },
   { href: "/progress",        label: "Progress", icon: FiTrendingUp },
-  { href: "/profil",          label: "Profil",   icon: FiUser },
 ];
 
 export default function MobileBottomNav() {

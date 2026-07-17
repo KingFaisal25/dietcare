@@ -6,12 +6,13 @@ import { usePathname } from "next/navigation";
 import {
   FiHome, FiUsers, FiShoppingBag, FiPackage, FiSettings,
   FiMenu, FiX, FiLogOut, FiUserPlus, FiPieChart, FiTag,
-  FiFileText, FiBell, FiSearch, FiShoppingCart, FiTruck,
+  FiFileText, FiSearch, FiShoppingCart, FiTruck,
 } from "react-icons/fi";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Scene3DBackground } from "@/components/ui/Scene3DBackground";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 
 const ADMIN_LINKS = [
   { href: "/admin/dashboard",        label: "Dashboard",           icon: FiHome },
@@ -157,12 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
-            {/* Notification bell */}
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--border-color)] bg-[var(--background)] text-neutral-500 transition-all hover:text-brand-600">
-              <FiBell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500" />
-            </button>
-
+            <NotificationBell />
             {/* Avatar */}
             <div className="flex items-center gap-2.5 border-l border-[color:var(--border-color)] pl-2">
               <img

@@ -3,7 +3,7 @@
 
 Halo **{{ $userName }}**,
 
-Terima kasih telah memilih DietCare Salma. Pembayaran Anda telah kami terima.
+Terima kasih telah memilih DietCare. Pembayaran Anda telah kami terima.
 
 ---
 
@@ -34,5 +34,5 @@ Buka Dashboard Saya
 Jika ada pertanyaan, jangan ragu untuk menghubungi kami via WhatsApp.
 
 Salam sehat,<br>
-**Tim DietCare Salma**
+**Tim DietCare**
 </x-mail::message>

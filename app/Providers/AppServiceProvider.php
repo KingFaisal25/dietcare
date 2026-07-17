@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
+use App\Models\BlogPost;
 use App\Models\Order;
 use App\Models\NutritionistProgram;
 use App\Observers\OrderObserver;
 use App\Observers\NutritionistProgramObserver;
+use App\Policies\ArticlePolicy;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api-public-read', function (Request $request) {
             return Limit::perMinute(120)->by($request->ip());
         });
+
+        Gate::policy(BlogPost::class, ArticlePolicy::class);
 
         // Register OrderObserver — triggers on Order status changes
         Order::observe(OrderObserver::class);

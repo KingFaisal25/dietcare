@@ -13,11 +13,10 @@ import {
 } from "lucide-react";
 import { useChat, type ChatMessage } from "@/lib/hooks/useChat";
 import { getWaLink } from "@/lib/wa";
+import { gsap } from "gsap";
 
-// ── Emoji picker data ───────────────────────────────────
 const EMOJI_LIST = ["😊", "👍", "🙏", "💪", "🥗", "🍎", "🏃", "❤️", "🔥", "✅", "⭐", "😄", "🎉", "👏", "💧", "🥦"];
 
-// ── Types ────────────────────────────────────────────────
 interface ChatWindowProps {
   chatRoomId: string;
   currentUserId: string;
@@ -29,7 +28,6 @@ interface ChatWindowProps {
   isPartnerOnline?: boolean;
 }
 
-// ── Component ────────────────────────────────────────────
 export default function ChatWindow({
   chatRoomId,
   currentUserId,
@@ -53,18 +51,36 @@ export default function ChatWindow({
   const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  // ── Auto scroll ───────────────────────────────────────
   useEffect(() => {
+    if (containerRef.current) {
+      gsap.from(containerRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (lastMessageRef.current && messages.length > 0) {
+      gsap.from(lastMessageRef.current, {
+        opacity: 0,
+        y: 10,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isPartnerTyping]);
 
-  // ── Mark messages as read when window is visible ──────
   useEffect(() => {
     markAllAsRead();
   }, [messages, markAllAsRead]);
 
-  // ── Send handler ──────────────────────────────────────
   const handleSend = useCallback(() => {
     if (!input.trim()) return;
     sendMessage(input);
@@ -73,7 +89,6 @@ export default function ChatWindow({
     inputRef.current?.focus();
   }, [input, sendMessage]);
 
-  // ── Enter to send, Shift+Enter for newline ────────────
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -81,13 +96,11 @@ export default function ChatWindow({
     }
   };
 
-  // ── Input change with typing indicator ────────────────
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     setTyping(e.target.value.length > 0);
   };
 
-  // ── Format timestamp ──────────────────────────────────
   const formatTime = (ts: number) => {
     const date = new Date(ts);
     return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
@@ -104,7 +117,6 @@ export default function ChatWindow({
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   };
 
-  // ── Group messages by date ────────────────────────────
   const groupedMessages: Array<{ date: string; messages: ChatMessage[] }> = [];
   let currentDateKey = "";
 
@@ -119,9 +131,11 @@ export default function ChatWindow({
   });
 
   return (
-    <div className="flex h-[600px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
-      {/* ── Header ─────────────────────────────────────── */}
-      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+    <div
+      ref={containerRef}
+      className="flex h-[600px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm"
+    >
+      <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 bg-white">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Image
@@ -129,11 +143,11 @@ export default function ChatWindow({
               alt={partnerName}
               width={44}
               height={44}
-              className="h-11 w-11 rounded-2xl object-cover ring-2 ring-emerald-50"
+              className="h-11 w-11 rounded-2xl object-cover ring-2 ring-primary-100"
             />
             <span
               className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${
-                isPartnerOnline ? "bg-emerald-500" : "bg-gray-300"
+                isPartnerOnline ? "bg-primary-500" : "bg-gray-300"
               }`}
             />
           </div>
@@ -157,7 +171,7 @@ export default function ChatWindow({
               href={getWaLink("Halo kak, saya lanjut konsultasi via WhatsApp ya.", partnerPhone)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+              className="flex items-center gap-2 rounded-2xl bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-primary-100"
             >
               <Phone className="h-4 w-4" />
               <span className="hidden sm:inline">WhatsApp</span>
@@ -166,8 +180,7 @@ export default function ChatWindow({
         </div>
       </div>
 
-      {/* ── Messages ───────────────────────────────────── */}
-      <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/50 px-5 py-4">
+      <div className="flex-1 space-y-4 overflow-y-auto bg-gray-50/30 px-5 py-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-gray-400">
             <MessageCircle className="h-12 w-12 opacity-30" />
@@ -175,7 +188,7 @@ export default function ChatWindow({
           </div>
         )}
 
-        {groupedMessages.map((group) => (
+        {groupedMessages.map((group, groupIdx) => (
           <div key={group.date} className="space-y-3">
             <div className="flex justify-center">
               <span className="rounded-full bg-gray-100 px-4 py-1.5 text-xs font-medium text-gray-500">
@@ -183,32 +196,45 @@ export default function ChatWindow({
               </span>
             </div>
 
-            {group.messages.map((msg) => {
+            {group.messages.map((msg, msgIdx) => {
               const isOwn = msg.senderId === currentUserId;
+              const isLastInGroup = msgIdx === group.messages.length - 1;
+              const isLastMessage =
+                groupIdx === groupedMessages.length - 1 && isLastInGroup;
 
               return (
-                <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+                <div
+                  key={msg.id}
+                  ref={isLastMessage ? lastMessageRef : null}
+                  className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                >
                   <div
-                    className={`max-w-[75%] rounded-3xl px-4 py-3 ${
+                    className={`max-w-[75%] rounded-2xl px-4 py-3 ${
                       isOwn
-                        ? "rounded-br-lg bg-emerald-600 text-white"
-                        : "rounded-bl-lg bg-white text-gray-900 shadow-sm ring-1 ring-gray-100"
+                        ? "rounded-br-md bg-primary-600 text-white"
+                        : "rounded-bl-md bg-white text-gray-900 shadow-sm border border-gray-100"
                     }`}
                   >
                     {!isOwn && (
-                      <p className="mb-1 text-xs font-semibold text-emerald-600">{msg.senderName}</p>
+                      <p className="mb-1 text-xs font-semibold text-primary-600">
+                        {msg.senderName}
+                      </p>
                     )}
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {msg.content}
+                    </p>
                     <div
                       className={`mt-2 flex items-center justify-end gap-1.5 text-[10px] ${
-                        isOwn ? "text-emerald-200" : "text-gray-400"
+                        isOwn ? "text-primary-200" : "text-gray-400"
                       }`}
                     >
                       <span>{formatTime(msg.timestamp)}</span>
                       {isOwn && (
-                        msg.isRead
-                          ? <CheckCheck className="h-3 w-3" />
-                          : <Check className="h-3 w-3" />
+                        msg.isRead ? (
+                          <CheckCheck className="h-3 w-3" />
+                        ) : (
+                          <Check className="h-3 w-3" />
+                        )
                       )}
                     </div>
                   </div>
@@ -220,11 +246,11 @@ export default function ChatWindow({
 
         {isPartnerTyping && (
           <div className="flex justify-start">
-            <div className="rounded-3xl rounded-bl-lg bg-white px-4 py-3 shadow-sm ring-1 ring-gray-100">
+            <div className="rounded-2xl rounded-bl-md bg-white px-4 py-3 shadow-sm border border-gray-100">
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:-0.3s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-400 [animation-delay:-0.15s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-emerald-400" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-400 [animation-delay:-0.3s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-400 [animation-delay:-0.15s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-400" />
                 <span className="ml-2 text-xs text-gray-500">sedang mengetik...</span>
               </div>
             </div>
@@ -234,9 +260,7 @@ export default function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ── Input Area ─────────────────────────────────── */}
       <div className="border-t border-gray-100 bg-white p-4">
-        {/* Emoji picker */}
         {showEmoji && (
           <div className="mb-3 flex flex-wrap gap-1.5 rounded-2xl bg-gray-50 p-3">
             {EMOJI_LIST.map((emoji) => (
@@ -261,7 +285,7 @@ export default function ChatWindow({
             onClick={() => setShowEmoji(!showEmoji)}
             className={`rounded-2xl p-3 transition ${
               showEmoji
-                ? "bg-emerald-50 text-emerald-600"
+                ? "bg-primary-50 text-primary-600"
                 : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
             }`}
           >
@@ -275,14 +299,14 @@ export default function ChatWindow({
             onKeyDown={handleKeyDown}
             rows={1}
             placeholder="Tulis pesan..."
-            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400"
+            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-100"
           />
 
           <button
             type="button"
             onClick={handleSend}
             disabled={!input.trim()}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white transition hover:bg-emerald-700 disabled:opacity-40 disabled:hover:bg-emerald-600"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-600 text-white transition hover:bg-primary-700 disabled:opacity-40 disabled:hover:bg-primary-600"
           >
             <Send className="h-4 w-4" />
           </button>

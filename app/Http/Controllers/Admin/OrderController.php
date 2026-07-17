@@ -49,23 +49,29 @@ class OrderController extends Controller
 
     public function assignNutritionist(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('program')->findOrFail($id);
         $nutritionistId = $request->nutritionist_id;
 
         DB::transaction(function() use ($order, $nutritionistId) {
+            $durationDays = $order->program ? $order->program->duration_days : 30;
+
             $nutritionistProgram = NutritionistProgram::updateOrCreate(
                 ['order_id' => $order->id],
                 [
-                    'user_id' => $order->user_id,
+                    'client_id' => $order->user_id,
                     'nutritionist_id' => $nutritionistId,
                     'program_id' => $order->program_id,
                     'status' => 'active',
                     'start_date' => now(),
-                    'end_date' => now()->addDays($order->duration_days)
+                    'end_date' => now()->addDays($durationDays),
+                    'remaining_consultations' => $order->program ? $order->program->max_consultations : 2
                 ]
             );
 
-            $order->update(['status' => 'active']);
+            // Update nutritionist_id in orders table as well
+            $order->update([
+                'nutritionist_id' => $nutritionistId
+            ]);
         });
 
         // Trigger emails/notifications
@@ -84,8 +90,50 @@ class OrderController extends Controller
 
     public function export(Request $request)
     {
-        // Use PhpSpreadsheet for Excel export
-        // ... implementation for Excel generation
-        return response()->json(['message' => 'Export logic triggered']);
+        $orders = Order::with('user', 'program')->latest()->get();
+
+        $headers = [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename=laporan-transaksi-' . date('Y-m-d') . '.csv',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        $columns = [
+            'ID', 'Kode Order', 'Nama Klien', 'Email Klien', 'Program', 
+            'Total Amount', 'Diskon', 'Final Amount', 'Status', 
+            'Metode Pembayaran', 'Tanggal Bayar', 'Tanggal Dibuat'
+        ];
+
+        $callback = function() use($orders, $columns) {
+            $file = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM for proper excel encoding of special chars/emojis
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            fputcsv($file, $columns, ';');
+
+            foreach ($orders as $order) {
+                fputcsv($file, [
+                    $order->id,
+                    $order->order_code,
+                    $order->user ? $order->user->name : '-',
+                    $order->user ? $order->user->email : '-',
+                    $order->program ? $order->program->name : '-',
+                    $order->total_amount,
+                    $order->discount_amount,
+                    $order->final_amount,
+                    $order->status,
+                    $order->payment_method ?? '-',
+                    $order->paid_at ? $order->paid_at->format('Y-m-d H:i:s') : '-',
+                    $order->created_at ? $order->created_at->format('Y-m-d H:i:s') : '-'
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

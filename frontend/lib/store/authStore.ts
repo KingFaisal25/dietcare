@@ -6,12 +6,11 @@ import { User } from '@/types';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
+  setToken: (token: string) => void;
   setLoading: (isLoading: boolean) => void;
   clearAuth: () => void;
   initialize: () => void;
@@ -19,53 +18,51 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
   isLoading: true,
 
   setUser: (user) => {
-    if (user && user.role) {
-      Cookies.set('role', user.role, { 
-        expires: 7, 
+    let formattedUser = user;
+    if (user && user.avatar && !user.avatar.startsWith('http')) {
+      formattedUser = {
+        ...user,
+        avatar: user.avatar.startsWith('/') ? user.avatar : `/storage/${user.avatar}`
+      };
+    }
+
+    if (formattedUser && formattedUser.role) {
+      Cookies.set('role', formattedUser.role, {
+        expires: 7,
         path: '/',
-        secure: window.location.protocol === 'https:',
+        secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
         sameSite: 'Strict',
       });
     } else {
       Cookies.remove('role', { path: '/' });
     }
-    set({ user });
+    set({ user: formattedUser, isLoading: false });
   },
 
-  setToken: (token) => {
-    if (token) {
-      localStorage.setItem('token', token);
-      // Set cookie so Next.js middleware can read it
-      Cookies.set('token', token, { 
-        expires: 7, 
-        path: '/',
-        secure: window.location.protocol === 'https:',
-        sameSite: 'Strict',
-      });
-    } else {
-      localStorage.removeItem('token');
-      Cookies.remove('token', { path: '/' });
-    }
-    set({ token });
+  setToken: (token: string) => {
+    // Store token in cookie for API requests
+    Cookies.set('token', token, {
+      expires: 7,
+      path: '/',
+      secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+      sameSite: 'Strict',
+    });
   },
 
   setLoading: (isLoading) => set({ isLoading }),
 
   clearAuth: () => {
-    localStorage.removeItem('token');
-    Cookies.remove('token', { path: '/' });
     Cookies.remove('role', { path: '/' });
-    set({ user: null, token: null, isLoading: false });
+    Cookies.remove('token', { path: '/' });
+    set({ user: null, isLoading: false });
   },
 
   initialize: () => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      set({ token, isLoading: false });
-    }
+    // With session auth, we'll rehydrate user profile from api.me on app mount
+    set({ isLoading: false });
   },
 }));
+

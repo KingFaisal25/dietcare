@@ -14,7 +14,7 @@ const UserDetail = ({ params }: { params: Promise<{ id: string }> }) => {
     name: 'Budi Santoso',
     email: 'budi@gmail.com',
     phone: '081234567890',
-    role: 'client',
+    role: 'patient',
     status: 'Aktif',
     joined: '2024-03-01',
     profile_pic: null,
@@ -40,7 +40,7 @@ const UserDetail = ({ params }: { params: Promise<{ id: string }> }) => {
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       <div className="flex items-center gap-4">
-        <Link href="/users">
+        <Link href="/admin/users">
           <Button variant="ghost" size="sm">
             <FiArrowLeft className="mr-2" /> Kembali
           </Button>
@@ -99,7 +99,7 @@ const UserDetail = ({ params }: { params: Promise<{ id: string }> }) => {
         </Card>
 
         {/* RIWAYAT & PROGRESS (IF CLIENT) */}
-        {user.role === 'client' && (
+        {user.role === 'patient' && (
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
               <h3 className="font-bold text-gray-700 mb-4">Riwayat Program</h3>

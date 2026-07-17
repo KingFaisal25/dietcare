@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { FiMenu, FiX, FiChevronDown, FiUser, FiLogOut, FiLayout, FiShoppingCart } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
 import { Button } from './ui/Button';
-import { ThemeToggle } from './ui/ThemeToggle';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,9 +15,14 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [programDropdown, setProgramDropdown] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const { user, clearAuth } = useAuthStore();
   const totalItems = useCartStore((s) => s.totalItems());
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,8 +42,9 @@ const Navbar = () => {
     { name: 'Program', href: '#', hasDropdown: true },
     { name: 'Ahli Gizi', href: '/ahli-gizi' },
     { name: 'Harga', href: '/harga' },
+    { name: '🧮 Kalkulator Gratis', href: '/kalkulator-gratis' },
     { name: 'Blog', href: '/blog' },
-    { name: 'Shop ', href: '/shop' },
+    { name: 'Shop', href: '/shop' },
   ];
 
   const programs = [
@@ -51,22 +56,20 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-all duration-300 md:px-6 ${
-          scrolled ? 'backdrop-blur-xl' : ''
-        }`}
+        className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-all duration-300 md:px-6 ${scrolled ? 'backdrop-blur-xl' : ''
+          }`}
       >
         <div className="page-shell">
-          <div className={`theme-transition flex h-[72px] items-center justify-between rounded-[28px] border px-4 md:px-6 ${
-            scrolled
-              ? 'surface-panel border-white/40 shadow-float dark:border-white/10'
+          <div className={`theme-transition flex h-[72px] items-center justify-between rounded-[28px] border px-4 md:px-6 ${scrolled
+              ? 'surface-panel border-black/5 shadow-float'
               : 'surface-card'
-          }`}>
+            }`}>
             <Link href="/" className="group flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 via-brand-500 to-secondary-500 text-white shadow-green">
                 <FaLeaf className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
               </div>
               <div>
-                <p className="text-base font-extrabold tracking-tight text-neutral-900 dark:text-neutral-0">DietCare</p>
+                <p className="text-base font-extrabold tracking-tight text-neutral-900">DietCare</p>
               </div>
             </Link>
 
@@ -80,9 +83,8 @@ const Navbar = () => {
                 >
                   <Link
                     href={link.href}
-                    className={`relative flex items-center gap-1 py-2 text-sm font-semibold transition-colors ${
-                      pathname === link.href ? 'text-brand-600 dark:text-brand-300' : 'text-neutral-600 hover:text-brand-600 dark:text-neutral-300 dark:hover:text-brand-300'
-                    }`}
+                    className={`relative flex items-center gap-1 py-2 text-sm font-semibold transition-colors ${pathname === link.href ? 'text-brand-600' : 'text-neutral-600 hover:text-brand-600'
+                      }`}
                   >
                     {link.name}
                     {link.hasDropdown && (
@@ -104,13 +106,13 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
                           transition={{ duration: 0.18 }}
-                          className="surface-card absolute left-0 top-full mt-3 w-64 rounded-[24px] p-2"
+                          className="surface-card absolute left-0 top-full mt-3 w-64 rounded-[24px] p-2 shadow-float"
                         >
                           {programs.map((prog) => (
                             <Link
                               key={prog.name}
                               href={prog.href}
-                              className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700 dark:text-neutral-100 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
+                              className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700"
                             >
                               <span className="text-lg">{prog.icon}</span>
                               <span>{prog.name}</span>
@@ -125,10 +127,9 @@ const Navbar = () => {
             </div>
 
             <div className="hidden items-center gap-3 lg:flex">
-              <ThemeToggle />
-              <Link href="/shop/cart" className="theme-transition relative flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200/70 bg-white/80 text-neutral-600 shadow-card hover:-translate-y-0.5 hover:border-brand-200 hover:text-brand-600 dark:border-white/10 dark:bg-neutral-900/80 dark:text-neutral-100">
+              <Link href="/shop/cart" className="theme-transition relative flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200/70 bg-white text-neutral-600 shadow-card hover:-translate-y-0.5 hover:border-brand-200 hover:text-brand-600">
                 <FiShoppingCart className="h-5 w-5" />
-                {totalItems > 0 && (
+                {isMounted && totalItems > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent-500 text-[10px] font-bold text-white">
                     {totalItems}
                   </span>
@@ -136,14 +137,14 @@ const Navbar = () => {
               </Link>
               {user ? (
                 <div className="group relative">
-                  <button className="theme-transition flex items-center gap-3 rounded-full border border-neutral-200/80 bg-white/85 px-2 py-1.5 shadow-card hover:-translate-y-0.5 dark:border-white/10 dark:bg-neutral-900/80">
+                  <button className="theme-transition flex items-center gap-3 rounded-full border border-neutral-200/80 bg-white/85 px-2 py-1.5 shadow-card hover:-translate-y-0.5">
                     <div className="hidden text-right xl:block">
-                      <p className="text-xs font-semibold text-neutral-900 dark:text-neutral-0">{user.name}</p>
-                      <p className="text-[10px] capitalize text-neutral-500 dark:text-neutral-400">{user.role}</p>
+                      <p className="text-xs font-semibold text-neutral-900">{user.name}</p>
+                      <p className="text-[10px] capitalize text-neutral-500">{user.role}</p>
                     </div>
                     <div className="overflow-hidden rounded-full border border-brand-100">
                       <Image
-                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=eefcf5&color=1da271`}
+                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=f0fdf4&color=1da271`}
                         alt={user.name}
                         width={38}
                         height={38}
@@ -152,12 +153,12 @@ const Navbar = () => {
                     <FiChevronDown className="mr-1 text-neutral-400" />
                   </button>
 
-                  <div className="surface-card invisible absolute right-0 top-full mt-3 w-56 rounded-[24px] p-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
-                    <Link href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'nutritionist' ? '/nutritionist/dashboard' : '/klien-dashboard'} className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700 dark:text-neutral-100 dark:hover:bg-brand-500/10 dark:hover:text-brand-300">
+                  <div className="surface-card invisible absolute right-0 top-full mt-3 w-56 rounded-[24px] p-2 opacity-0 shadow-float transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                    <Link href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'nutritionist' ? '/nutritionist/dashboard' : '/klien-dashboard'} className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700">
                       <FiLayout size={16} className="text-brand-500" />
                       Dashboard
                     </Link>
-                    <Link href="/profil" className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700 dark:text-neutral-100 dark:hover:bg-brand-500/10 dark:hover:text-brand-300">
+                    <Link href="/profil" className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700">
                       <FiUser size={16} className="text-brand-500" />
                       Profil Saya
                     </Link>
@@ -183,9 +184,8 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-2 lg:hidden">
-              <ThemeToggle className="h-10 w-10" />
               <button
-                className="theme-transition flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200/70 bg-white/80 text-neutral-600 shadow-card hover:text-brand-600 dark:border-white/10 dark:bg-neutral-900/80 dark:text-neutral-100"
+                className="theme-transition flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200/70 bg-white text-neutral-600 shadow-card hover:text-brand-600"
                 onClick={() => setIsOpen(true)}
                 aria-label="Buka menu"
               >
@@ -203,7 +203,7 @@ const Navbar = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-neutral-950/35 backdrop-blur-sm"
+              className="fixed inset-0 z-[60] bg-neutral-950/20 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
             <motion.div
@@ -211,7 +211,7 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.24, ease: 'easeOut' }}
-              className="fixed bottom-0 right-0 top-0 z-[70] flex w-full max-w-sm flex-col border-l border-white/10 bg-[var(--background)] p-6 shadow-modal"
+              className="fixed bottom-0 right-0 top-0 z-[70] flex w-full max-w-sm flex-col border-l border-neutral-100 bg-white p-6 shadow-modal"
             >
               <div className="mb-8 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-3">
@@ -219,13 +219,13 @@ const Navbar = () => {
                     <FaLeaf size={16} />
                   </div>
                   <div>
-                    <p className="font-bold text-neutral-900 dark:text-neutral-0">DietCare</p>
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-brand-600 dark:text-brand-300">Healthy Living</p>
+                    <p className="font-bold text-neutral-900">DietCare</p>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-brand-600">Healthy Living</p>
                   </div>
                 </Link>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="theme-transition rounded-full border border-neutral-200 p-2 text-neutral-500 hover:text-brand-600 dark:border-white/10 dark:text-neutral-200"
+                  className="theme-transition rounded-full border border-neutral-200 p-2 text-neutral-500 hover:text-brand-600"
                   aria-label="Tutup menu"
                 >
                   <FiX size={20} />
@@ -242,7 +242,7 @@ const Navbar = () => {
                           <Link
                             key={prog.name}
                             href={prog.href}
-                            className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700 dark:text-neutral-100 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
+                            className="theme-transition flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-brand-50 hover:text-brand-700"
                           >
                             <span className="text-lg">{prog.icon}</span>
                             {prog.name}
@@ -252,11 +252,10 @@ const Navbar = () => {
                     ) : (
                       <Link
                         href={link.href}
-                        className={`block rounded-2xl px-4 py-3 text-base font-semibold ${
-                          pathname === link.href
-                            ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300'
-                            : 'text-neutral-700 dark:text-neutral-100'
-                        }`}
+                        className={`block rounded-2xl px-4 py-3 text-base font-semibold ${pathname === link.href
+                            ? 'bg-brand-50 text-brand-700'
+                            : 'text-neutral-700'
+                          }`}
                       >
                         {link.name}
                       </Link>
@@ -265,10 +264,12 @@ const Navbar = () => {
                 ))}
               </div>
 
-              <div className="mt-auto space-y-3 border-t border-[color:var(--border-color)] pt-6">
-                <Link href="/shop/cart" className="theme-transition flex items-center justify-between rounded-2xl border border-[color:var(--border-color)] px-4 py-3 text-sm font-semibold">
+              <div className="mt-auto space-y-3 border-t border-neutral-100 pt-6">
+                <Link href="/shop/cart" className="theme-transition flex items-center justify-between rounded-2xl border border-neutral-200 px-4 py-3 text-sm font-semibold">
                   <span>Keranjang</span>
-                  <span className="rounded-full bg-accent-500 px-2 py-0.5 text-[11px] text-white">{totalItems}</span>
+                  {isMounted && (
+                    <span className="rounded-full bg-accent-500 px-2 py-0.5 text-[11px] text-white">{totalItems}</span>
+                  )}
                 </Link>
                 {user ? (
                   <>

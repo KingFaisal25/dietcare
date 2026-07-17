@@ -11,16 +11,16 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden pb-10 pt-24">
-      <div className="hero-orb left-0 top-0 h-72 w-72 bg-brand-500/20" />
-      <div className="hero-orb bottom-0 right-0 h-80 w-80 bg-secondary-500/10" />
+    <footer className="relative overflow-hidden pb-8 pt-16 md:pt-24">
+      <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-amber-200/25 blur-3xl" />
 
       <div className="page-shell relative z-10">
-        <div className="surface-card rounded-[36px] px-6 py-8 md:px-10 md:py-10">
+        <div className="surface-card overflow-hidden rounded-[36px] border-white/70 bg-white/75 px-6 py-8 shadow-[0_24px_80px_rgba(15,23,42,.08)] backdrop-blur-2xl md:px-10 md:py-10">
           <div className="grid-12 mb-12">
             <div className="col-span-12 lg:col-span-4 space-y-6">
               <Link href="/" className="group flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 via-brand-500 to-secondary-500 text-white shadow-green">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 via-brand-500 to-teal-500 text-white shadow-green">
                   <FaLeaf className="transition-transform duration-300 group-hover:rotate-12" />
                 </div>
                 <div>
@@ -91,11 +91,11 @@ const Footer = () => {
                 </div>
                 <div className="flex items-start gap-3">
                   <FiPhone className="mt-0.5 text-brand-500" />
-                  <span>+62 812 3456 7890</span>
+                  <a href="tel:+6285798137527" className="transition hover:text-brand-600">0857 9813 7527</a>
                 </div>
                 <div className="flex items-start gap-3">
                   <FiMapPin className="mt-0.5 text-brand-500" />
-                  <span>Jl. Kesehatan No. 123, Jakarta Selatan, DKI Jakarta 12345</span>
+                  <span>Ciwidey, Kabupaten Bandung, Jawa Barat</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   {[
@@ -103,7 +103,7 @@ const Footer = () => {
                     { icon: <FiTwitter />, label: 'Twitter', href: '#' },
                     { icon: <FiFacebook />, label: 'Facebook', href: '#' },
                     { icon: <FiYoutube />, label: 'Youtube', href: '#' },
-                    { icon: <FaWhatsapp />, label: 'WhatsApp', href: '#' },
+                    { icon: <FaWhatsapp />, label: 'WhatsApp', href: 'https://wa.me/6285798137527' },
                   ].map((social) => (
                     <Link
                       key={social.label}
@@ -122,6 +122,9 @@ const Footer = () => {
           <div className="flex flex-col gap-4 border-t border-[color:var(--border-color)] pt-6 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-5 text-xs font-medium text-neutral-500 dark:text-neutral-400">
               <span>&copy; {currentYear} DietCare. All rights reserved.</span>
+              <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">
+                Development by KingFaisal
+              </span>
               <Link href="/syarat-ketentuan" className="theme-transition hover:text-brand-600 dark:hover:text-brand-300">
                 Syarat & Ketentuan
               </Link>

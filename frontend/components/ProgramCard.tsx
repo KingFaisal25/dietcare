@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Phone, Crown, Sparkles } from "lucide-react";
-import { getWaLink } from "@/lib/wa";
+import { Check, Crown, Sparkles, ArrowRight } from "lucide-react";
+import { Button } from "./ui/Button";
+import { TiltCard } from "./ui/TiltCard";
 
 export interface ProgramCardProps {
   programName: string;
@@ -32,61 +33,64 @@ export default function ProgramCard({
   isPopular = false,
   isRecommended = false,
   checkoutUrl,
-  waMessage,
   onSelect,
 }: ProgramCardProps) {
   const formattedPrice = `Rp ${price.toLocaleString("id-ID")}`;
 
   return (
-    <div
-      className={`relative flex flex-col rounded-3xl border-2 bg-white p-7 transition-all hover:shadow-xl ${
+    <TiltCard
+      className={`relative flex flex-col rounded-[2rem] border-2 bg-white p-8 transition-all duration-spring ${
         isPopular
-          ? "border-emerald-500 shadow-lg shadow-emerald-100 ring-1 ring-emerald-500"
+          ? "border-brand-500 shadow-green"
           : isRecommended
-            ? "border-emerald-400 shadow-md"
-            : "border-gray-100 hover:border-gray-200"
+            ? "border-brand-200 shadow-float"
+            : "border-neutral-100 hover:border-brand-100 shadow-card"
       }`}
     >
       {/* Badge */}
       {isPopular && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-brand-600 px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-green">
           <Crown className="h-3 w-3" />
           Paling Populer
         </div>
       )}
       {!isPopular && isRecommended && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-sky-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-brand-500 px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-float">
           <Sparkles className="h-3 w-3" />
-          Recommended
+          Direkomendasikan
         </div>
       )}
 
       {/* Header */}
-      <div className="mb-6 text-center">
-        <h3 className="text-xl font-bold text-gray-900">{programName}</h3>
-        <p className="mt-1 text-sm text-gray-500">{tagline}</p>
+      <div className="mb-8 text-center">
+        <h3 className="text-2xl font-black tracking-tight text-neutral-900">{programName}</h3>
+        <p className="mt-2 text-sm font-medium text-neutral-500">{tagline}</p>
       </div>
 
       {/* Price */}
-      <div className="mb-6 text-center">
+      <div className="mb-8 text-center bg-brand-50/50 rounded-3xl p-6">
         {originalPrice && (
-          <p className="text-sm text-gray-400 line-through">
+          <p className="mb-1 text-xs font-bold text-neutral-400 line-through">
             Rp {originalPrice.toLocaleString("id-ID")}
           </p>
         )}
-        <p className="text-3xl font-extrabold text-gray-900">{formattedPrice}</p>
+        <p className="text-4xl font-black text-neutral-900">{formattedPrice}</p>
         {pricePerMonth && (
-          <p className="mt-1 text-sm font-medium text-emerald-600">{pricePerMonth}/bulan</p>
+          <p className="mt-2 text-sm font-bold text-brand-600">{pricePerMonth}/bulan</p>
         )}
-        <p className="mt-1 text-sm text-gray-400">{duration}</p>
+        <div className="mt-3 inline-block px-3 py-1 bg-white rounded-full border border-brand-100 text-[10px] font-bold text-brand-600 uppercase tracking-wider">
+          {duration}
+        </div>
       </div>
 
       {/* Features */}
-      <ul className="mb-8 flex-1 space-y-3">
+      <ul className="mb-8 flex-1 space-y-4">
         {features.map((feature, i) => (
-          <li key={i} className="flex items-start gap-2.5">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-            <span className="text-sm text-gray-600">{feature}</span>
+          <li key={i} className="flex items-start gap-3">
+            <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600">
+              <Check className="h-3 w-3 stroke-[3px]" />
+            </div>
+            <span className="text-sm font-medium text-neutral-600 leading-snug">{feature}</span>
           </li>
         ))}
       </ul>
@@ -95,27 +99,16 @@ export default function ProgramCard({
       <Link
         href={checkoutUrl ?? `/checkout?program=${slug}`}
         onClick={onSelect}
-        className={`block w-full rounded-2xl py-3.5 text-center text-sm font-bold transition-all ${
-          isPopular || isRecommended
-            ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700"
-            : "border-2 border-gray-200 text-gray-700 hover:border-emerald-500 hover:text-emerald-600"
-        }`}
+        className="block w-full"
       >
-        Beli Sekarang
-      </Link>
-
-      {/* WA link */}
-      {waMessage && (
-        <a
-          href={getWaLink(waMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-400 transition hover:text-emerald-600"
+        <Button 
+          variant={isPopular || isRecommended ? "primary" : "secondary"}
+          className="w-full h-14 group"
         >
-          <Phone className="h-3.5 w-3.5" />
-          Tanya via WA dulu
-        </a>
-      )}
-    </div>
+          Pilih Program Ini
+          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </Button>
+      </Link>
+    </TiltCard>
   );
 }

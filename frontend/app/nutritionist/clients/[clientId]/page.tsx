@@ -54,134 +54,40 @@ const tabs = [
 
 type DetailTab = (typeof tabs)[number]["key"];
 
-// ─────────── Chat Tab ───────────
-interface ChatMessage {
-  id: number;
-  sender_role: "client" | "nutritionist";
-  message: string;
-  read_at: string | null;
-  created_at: string;
-}
+import ChatWindow from "@/components/ChatWindow";
+import { getChatRoomId } from "@/lib/hooks/useChat";
+import { useAuthStore } from "@/lib/store/authStore";
 
-function ChatTab({ clientId }: { clientId: number }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+function ChatTab({
+  clientId,
+  clientName,
+  clientAvatarUrl,
+}: {
+  clientId: number;
+  clientName: string;
+  clientAvatarUrl: string;
+}) {
+  const { user: currentUser } = useAuthStore();
+  const chatRoomId = getChatRoomId(clientId, currentUser?.id || 0);
 
-  const fetchMessages = async () => {
-    try {
-      const res = await api.get(`/nutritionist/clients/${clientId}/messages`);
-      setMessages(res.data.data ?? []);
-    } catch {
-      // silently fail on poll errors
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMessages();
-    intervalRef.current = setInterval(fetchMessages, 5000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [clientId]);
-
-  // Auto-scroll to latest message
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || isSending) return;
-    setIsSending(true);
-    try {
-      const res = await api.post(`/nutritionist/clients/${clientId}/messages`, { message: text });
-      setMessages((prev) => [...prev, res.data.data]);
-      setInput("");
-    } catch {
-      // no toast — keep it minimal
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-sm text-neutral-400">Memuat profil...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-[32px] border border-neutral-100 shadow-sm overflow-hidden flex flex-col" style={{ height: "calc(100vh - 280px)", minHeight: 400 }}>
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center gap-3 shrink-0">
-          <div className="p-2 bg-brand-50 rounded-xl">
-            <FiMessageSquare className="w-4 h-4 text-brand-500" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-neutral-900">Chat dengan Klien</p>
-            <p className="text-[10px] text-neutral-400">Refresh otomatis setiap 5 detik</p>
-          </div>
-        </div>
-
-        {/* Message list */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-neutral-400 animate-pulse">Memuat pesan...</p>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-2">
-              <FiMessageSquare className="w-8 h-8 text-neutral-200" />
-              <p className="text-sm text-neutral-400">Belum ada pesan. Mulai dari sini!</p>
-            </div>
-          ) : (
-            messages.map((msg) => {
-              const isNutritionist = msg.sender_role === "nutritionist";
-              return (
-                <div key={msg.id} className={`flex ${isNutritionist ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                      isNutritionist
-                        ? "bg-brand-500 text-white rounded-br-md"
-                        : "bg-neutral-100 text-neutral-800 rounded-bl-md"
-                    }`}
-                  >
-                    <p>{msg.message}</p>
-                    <p className={`text-[10px] mt-1 ${isNutritionist ? "text-white/60 text-right" : "text-neutral-400"}`}>
-                      {fmt(msg.created_at)}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Input */}
-        <form onSubmit={handleSend} className="px-4 py-3 border-t border-neutral-100 flex gap-2 shrink-0">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tulis pesan..."
-            className="flex-1 px-4 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all"
-            disabled={isSending}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isSending}
-            className="p-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white rounded-xl transition-all shrink-0"
-          >
-            <FiSend className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
+      <ChatWindow
+        chatRoomId={chatRoomId}
+        currentUserId={String(currentUser.id)}
+        currentUserName={currentUser.name}
+        currentUserRole="nutritionist"
+        partnerName={clientName}
+        partnerAvatarUrl={clientAvatarUrl}
+      />
     </div>
   );
 }
@@ -585,7 +491,13 @@ export default function NutritionistClientDetailPage({
         )}
 
         {/* TAB CHAT */}
-        {activeTab === "chat" && <ChatTab clientId={clientId} />}
+        {activeTab === "chat" && (
+          <ChatTab
+            clientId={clientId}
+            clientName={detail.client.name}
+            clientAvatarUrl={detail.client.avatar_url}
+          />
+        )}
       </div>
 
       {/* MOBILE ACTION BUTTONS */}

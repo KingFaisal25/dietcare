@@ -19,7 +19,7 @@ class ClientProfileController extends Controller
      */
     public function show(Request $request)
     {
-        $user = $request->user()->load(['clientProfile', 'nutritionistPrograms.program', 'nutritionistPrograms.nutritionist']);
+        $user = $request->user()->load(['clientProfile', 'clientPrograms.program', 'clientPrograms.nutritionist']);
         return response()->json($user);
     }
 

@@ -55,6 +55,22 @@ const OrdersManagement = () => {
     }).format(value);
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await api.get('/admin/orders/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `laporan-order-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Data order berhasil diexport');
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal mengexport data order');
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 bg-surface-50 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -62,7 +78,11 @@ const OrdersManagement = () => {
           <h1 className="text-2xl font-black text-neutral-900 leading-tight">Kelola Order</h1>
           <p className="text-neutral-500 text-sm font-medium">Monitoring semua transaksi dan status pembayaran</p>
         </div>
-        <Button variant="outline" className="rounded-xl font-bold border-neutral-200 hover:bg-white transition-all">
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          className="rounded-xl font-bold border-neutral-200 hover:bg-white transition-all"
+        >
           <FiDownload className="mr-2" /> Export Excel
         </Button>
       </div>

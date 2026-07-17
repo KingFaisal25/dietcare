@@ -128,7 +128,7 @@
 <body>
 
     <div class="header">
-        <h1>DietCare Salma</h1>
+        <h1>DietCare</h1>
         <p>Laporan Progress Diet Klien</p>
     </div>
 

@@ -20,8 +20,6 @@ interface LoginResponse {
   message: string;
   data: {
     user: User;
-    access_token: string;
-    token_type: string;
   };
 }
 
@@ -39,7 +37,7 @@ interface ApiErrorResponse {
 
 export function useAuth() {
   const router = useRouter();
-  const { setUser, setToken, clearAuth, setLoading } = useAuthStore();
+  const { setUser, clearAuth, setLoading } = useAuthStore();
 
   const login = useCallback(
     async (login: string, password: string) => {
@@ -50,9 +48,8 @@ export function useAuth() {
           password,
         });
 
-        const { user, access_token } = response.data.data;
+        const { user } = response.data.data;
 
-        setToken(access_token);
         setUser(user);
 
         // Redirect based on role
@@ -63,7 +60,7 @@ export function useAuth() {
           case 'nutritionist':
             router.push('/nutritionist/dashboard');
             break;
-          case 'client':
+          case 'patient':
           default:
             router.push('/klien-dashboard');
             break;
@@ -95,7 +92,7 @@ export function useAuth() {
         setLoading(false);
       }
     },
-    [router, setUser, setToken, setLoading]
+    [router, setUser, setLoading]
   );
 
   const register = useCallback(

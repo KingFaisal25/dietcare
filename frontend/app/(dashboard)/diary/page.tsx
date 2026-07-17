@@ -103,43 +103,6 @@ const MEAL_TYPES = [
   { id: "dinner", label: "Makan Malam", icon: "🌙" },
 ];
 
-// --- Dummy Data Fallback ---
-const dummyDiaryData: DiaryData = {
-  consumed: { calories: 1450, protein: 72, carbs: 190, fat: 38 },
-  remaining: { calories: 350, protein: 18, carbs: 35, fat: 12 },
-  target: { calories: 1800, protein: 90, carbs: 225, fat: 50 },
-  entries: {
-    breakfast: [
-      { id: 1, food_name_snapshot: "Oatmeal with Fruits", quantity_gram: 250, calories: 350 },
-      { id: 2, food_name_snapshot: "Black Coffee", quantity_gram: 200, calories: 5 },
-    ],
-    lunch: [
-      { id: 3, food_name_snapshot: "Grilled Chicken Salad", quantity_gram: 350, calories: 450 },
-    ],
-    dinner: [
-      { id: 4, food_name_snapshot: "Steamed Fish with Broccoli", quantity_gram: 300, calories: 400 },
-    ],
-    morning_snack: [],
-    afternoon_snack: [
-      { id: 5, food_name_snapshot: "Apple", quantity_gram: 150, calories: 95 },
-    ],
-    other: []
-  }
-};
-
-const dummyWeeklySummary: WeeklySummary = {
-  data: [
-    { day_name: "Sen", calories: 1750 },
-    { day_name: "Sel", calories: 1850 },
-    { day_name: "Rab", calories: 1600 },
-    { day_name: "Kam", calories: 1900 },
-    { day_name: "Jum", calories: 1450 },
-    { day_name: "Sab", calories: 0 },
-    { day_name: "Min", calories: 0 },
-  ],
-  best_day: "Rabu"
-};
-
 export default function FoodDiaryPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [diaryData, setDiaryData] = useState<DiaryData | null>(null);
@@ -165,10 +128,10 @@ export default function FoodDiaryPage() {
       setWeeklySummary(weeklyRes.data);
       setStreak(streakRes.data.streak);
     } catch (err) {
-      console.warn("Failed to fetch diary, using dummy data");
-      setDiaryData(dummyDiaryData);
-      setWeeklySummary(dummyWeeklySummary);
-      setStreak(7);
+      setDiaryData(null);
+      setWeeklySummary(null);
+      setStreak(0);
+      toast.error("Data diary belum dapat dimuat. Silakan coba lagi.");
     }
   }, [selectedDate]);
 

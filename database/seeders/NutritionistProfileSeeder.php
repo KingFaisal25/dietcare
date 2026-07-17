@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace Database\Seeders;
 
@@ -14,24 +14,24 @@ class NutritionistProfileSeeder extends Seeder
     public function run(): void
     {
         $nutritionist1 = User::updateOrCreate(
-            ['email' => '@DietCare.com'],
+            ['email' => 'nadia@dietcare.com'],
             [
-                'name' => ' DietCare',
-                'username' => '',
+                'name' => 'Nadia S.Gz',
+                'username' => 'nadia_sgz',
                 'password' => Hash::make('password123'),
                 'phone' => '081234567891',
                 'email_verified_at' => now(),
             ]
         );
-        $nutritionist1->assignRole('nutritionist');
+        $nutritionist1->syncRoles(['nutritionist']);
 
         NutritionistProfile::updateOrCreate(
             ['user_id' => $nutritionist1->id],
             [
-                'slug' => '-dietcare',
+                'slug' => 'nadia-sgz',
                 'title' => 'S.Gz',
                 'str_number' => '12345678901234',
-                'bio' => 'Halo! Saya , ahli gizi spesialis penurunan berat badan. Berpengalaman 5 tahun membantu klien mencapai body goals.',
+                'bio' => 'Halo! Saya Nadia, ahli gizi spesialis penurunan berat badan. Berpengalaman 5 tahun membantu klien mencapai body goals.',
                 'years_experience' => 5,
                 'city' => 'Jakarta',
                 'specializations' => ['Penurunan BB', 'Gizi Olahraga', 'Gizi Klinis'],
@@ -60,16 +60,16 @@ class NutritionistProfileSeeder extends Seeder
         }
 
         $nutritionist2 = User::updateOrCreate(
-            ['email' => 'andi@DietCare.com'],
+            ['email' => 'andi@dietcare.com'],
             [
                 'name' => 'Dr. Andi',
                 'username' => 'drandi',
                 'password' => Hash::make('password123'),
-                'phone' => '081234567892',
+                'phone' => '081234567893',
                 'email_verified_at' => now(),
             ]
         );
-        $nutritionist2->assignRole('nutritionist');
+        $nutritionist2->syncRoles(['nutritionist']);
 
         NutritionistProfile::updateOrCreate(
             ['user_id' => $nutritionist2->id],

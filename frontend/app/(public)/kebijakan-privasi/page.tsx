@@ -10,7 +10,7 @@ const PrivacyPage = () => {
       <div className="container mx-auto max-w-4xl">
         <div className="mb-12 text-center space-y-4">
           <h1 className="text-4xl font-black text-gray-900">Kebijakan Privasi</h1>
-          <p className="text-gray-500 font-medium italic">Terakhir diperbarui: 1 April 2024</p>
+          <p className="text-gray-500 font-medium italic">Terakhir diperbarui: 1 April 2026</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -96,7 +96,7 @@ const PrivacyPage = () => {
 
           <div className="pt-8 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-400">Hubungi Data Protection Officer (DPO) kami:</p>
-            <p className="font-bold text-gray-700">dpo@nutripro.id</p>
+            <p className="font-bold text-gray-700">dpo@dietcare.id</p>
           </div>
         </Card>
       </div>

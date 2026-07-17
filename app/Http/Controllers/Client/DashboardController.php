@@ -64,22 +64,26 @@ class DashboardController extends Controller
             ],
         ];
 
-        // Next Consultation
-        $nextConsultation = Consultation::with('nutritionist')
-            ->where('client_id', $user->id)
-            ->where('scheduled_at', '>', now())
-            ->orderBy('scheduled_at', 'asc')
-            ->first();
+        // Next Consultation - go through NutritionistProgram (which has client_id)
+        $nextConsultation = null;
+        if ($activeProgram) {
+            $nextConsultation = Consultation::with(['nutritionistProgram.nutritionist'])
+                ->where('nutritionist_program_id', $activeProgram->id)
+                ->where('scheduled_at', '>', now())
+                ->orderBy('scheduled_at', 'asc')
+                ->first();
+        }
 
         $consultationData = null;
         if ($nextConsultation) {
+            $nutritionist = $nextConsultation->nutritionistProgram?->nutritionist;
             $isSoon = $nextConsultation->scheduled_at->diffInMinutes(now()) < 30;
             $consultationData = [
-                'nutritionistName' => $nextConsultation->nutritionist->name,
-                'nutritionistPhoto' => $nextConsultation->nutritionist->avatar_url,
-                'date' => $nextConsultation->scheduled_at->toDateString(),
-                'time' => $nextConsultation->scheduled_at->format('H:i'),
-                'isSoon' => $isSoon,
+                'nutritionistName'  => $nutritionist?->name ?? 'Ahli Gizi',
+                'nutritionistPhoto' => $nutritionist?->avatar_url ?? null,
+                'date'              => $nextConsultation->scheduled_at->toDateString(),
+                'time'              => $nextConsultation->scheduled_at->format('H:i'),
+                'isSoon'            => $isSoon,
             ];
         }
 

@@ -14,7 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'name' => $this->name,
             'username' => $this->username,
@@ -25,5 +25,16 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
         ];
+
+        // If user is nutritionist, include nutritionist profile
+        if ($this->isNutritionist() && $this->nutritionistProfile) {
+            $data['nutritionist_profile'] = $this->nutritionistProfile;
+            // If nutritionist has a photo, use that instead of default avatar
+            if ($this->nutritionistProfile->photo) {
+                $data['avatar'] = $this->nutritionistProfile->photo;
+            }
+        }
+
+        return $data;
     }
 }

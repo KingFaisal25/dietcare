@@ -136,6 +136,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isClient()
     {
-        return $this->hasRole('client');
+        return $this->hasRole('patient');
+    }
+
+    /**
+     * Convert the model instance to an array.
+     */
+    public function toArray()
+    {
+        $attributes = parent::toArray();
+        $attributes['avatar'] = $this->avatar_url;
+        return $attributes;
     }
 }

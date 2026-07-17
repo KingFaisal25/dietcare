@@ -206,12 +206,14 @@ class NutritionCalculatorController extends Controller
             return $this->error('Profil gizi belum diisi. Silakan lengkapi onboarding.', 404);
         }
 
-        // Hitung juga makro dari data yang tersimpan
-        $macros = $this->calculator->calculateMacros(
-            $profile->calorie_target,
-            $profile->target_type,
-            $profile->medical_conditions ?? []
-        );
+        $macros = null;
+        if ($profile->calorie_target) {
+            $macros = $this->calculator->calculateMacros(
+                (float) $profile->calorie_target,
+                $profile->target_type,
+                $profile->medical_conditions ?? []
+            );
+        }
 
         return $this->success('Profil gizi berhasil diambil.', [
             'profile' => $profile,

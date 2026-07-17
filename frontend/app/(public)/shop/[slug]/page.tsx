@@ -7,7 +7,7 @@ import { ShopProduct } from '@/types/shop';
 import { useCartStore } from '@/store/cartStore';
 import { FiArrowLeft, FiShoppingCart, FiZap, FiMinus, FiPlus, FiCheckCircle, FiStar } from 'react-icons/fi';
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
+const API = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 const fmt = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 

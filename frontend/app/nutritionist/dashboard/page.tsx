@@ -14,6 +14,8 @@ import {
   FiChevronRight,
   FiBell,
   FiMessageSquare,
+  FiCheckCircle,
+  FiAlertCircle
 } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -43,279 +45,258 @@ export default function NutritionistDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-8">
         <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <div className="h-8 w-64 bg-neutral-100 animate-pulse rounded-lg" />
-            <div className="h-4 w-48 bg-neutral-100 animate-pulse rounded-lg" />
+          <div className="space-y-3">
+            <div className="h-10 w-64 bg-slate-100 animate-pulse rounded-2xl" />
+            <div className="h-5 w-48 bg-slate-50 animate-pulse rounded-xl" />
           </div>
-          <div className="h-12 w-40 bg-neutral-100 animate-pulse rounded-xl" />
+          <div className="h-14 w-40 bg-slate-100 animate-pulse rounded-[1.25rem]" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
         <div className="grid gap-8 xl:grid-cols-[1.65fr,1fr]">
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <div className="h-6 w-40 bg-neutral-100 animate-pulse rounded-lg" />
-              <div className="h-10 w-64 bg-neutral-100 animate-pulse rounded-xl" />
+              <div className="h-7 w-40 bg-slate-100 animate-pulse rounded-xl" />
+              <div className="h-12 w-64 bg-slate-50 animate-pulse rounded-[1.25rem]" />
             </div>
             <div className="space-y-4">
-              <SkeletonListItem />
-              <SkeletonListItem />
-              <SkeletonListItem />
+              {[...Array(3)].map((_, i) => <SkeletonListItem key={i} />)}
             </div>
           </div>
-          <div className="space-y-6">
-            <div className="h-[400px] bg-neutral-50 animate-pulse rounded-3xl" />
-          </div>
+          <div className="h-[500px] bg-slate-50 animate-pulse rounded-[2.5rem]" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8 relative">
+    <div className="min-h-screen bg-slate-50/50 pb-20 overflow-hidden relative">
       <Scene3DBackground subtle />
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Selamat pagi, Ahli Gizi! 👋</h1>
-          <p className="text-sm text-gray-400 font-medium">
-            {format(new Date(), "EEEE, d MMMM yyyy", { locale: idLocale })}
-          </p>
+      
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-12 relative z-10">
+        
+        {/* HEADER SECTION */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-2">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-green-50 text-green-700 text-[11px] font-black uppercase tracking-[0.2em] mb-2 border border-green-100">
+              Professional Dashboard
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Selamat datang, <span className="text-green-600">Ahli Gizi!</span> 👋
+            </h1>
+            <p className="text-slate-500 font-medium">
+              {format(new Date(), "EEEE, d MMMM yyyy", { locale: idLocale })}
+            </p>
+          </div>
+          <Link href="/nutritionist/schedule">
+            <Button className="h-16 px-10 rounded-[1.25rem] bg-green-600 hover:bg-green-700 font-black text-sm shadow-2xl shadow-green-900/20 border-none flex items-center gap-3 group">
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center group-hover:rotate-90 transition-transform">
+                <FiPlus size={20} />
+              </div>
+              Kelola Jadwal
+            </Button>
+          </Link>
         </div>
-        <Link href="/nutritionist/schedule">
-          <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-emerald-500/25 hover:shadow-xl text-white font-bold gap-2 rounded-xl px-6 py-6 border-none">
-            <FiPlus className="h-5 w-5" />
-            Tambah Jadwal
-          </Button>
-        </Link>
-      </div>
 
-      {/* STATS ROW */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 relative z-10">
-        <StatCard label="Total Klien Aktif" value={dashboard.stats.total_active_clients} icon={<FiUsers className="h-6 w-6" />} color="bg-blue-500/15 text-blue-400" />
-        <StatCard label="Konsultasi Hari Ini" value={dashboard.stats.consultations_today} icon={<FiCalendar className="h-6 w-6" />} color="bg-emerald-500/15 text-emerald-400" />
-        <StatCard label="Menunggu Review" value={dashboard.notifications.meal_plan_pending.count} icon={<FiClock className="h-6 w-6" />} color="bg-amber-500/15 text-amber-400" />
-        <StatCard label="Rating Rata-rata" value={dashboard.stats.average_rating?.toFixed(1) || "-"} suffix="/5" icon={<FiStar className="h-6 w-6" />} color="bg-yellow-500/15 text-yellow-400" />
-      </div>
+        {/* STATS OVERVIEW */}
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total Klien Aktif" value={dashboard?.stats?.total_active_clients ?? 0} icon={<FiUsers size={24} />} color="text-blue-600" bg="bg-blue-50" />
+          <StatCard label="Konsultasi Hari Ini" value={dashboard?.stats?.consultations_today ?? 0} icon={<FiCalendar size={24} />} color="text-green-600" bg="bg-green-50" />
+          <StatCard label="Menunggu Review" value={dashboard?.notifications?.meal_plan_pending?.count ?? 0} icon={<FiClock size={24} />} color="text-orange-600" bg="bg-orange-50" />
+          <StatCard label="Rating Rata-rata" value={dashboard?.stats?.average_rating?.toFixed(1) || "-"} suffix="/5" icon={<FiStar size={24} />} color="text-amber-500" bg="bg-amber-50" />
+        </div>
 
-      <div className="grid gap-8 xl:grid-cols-[1.65fr,1fr] relative z-10">
-        {/* KIRI: DAFTAR KLIEN */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-xl font-bold text-white">Daftar Klien Aktif</h2>
-            <div className="relative w-full sm:w-72">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Cari klien..."
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-900 border border-white/[0.06] rounded-xl text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all"
-              />
+        <div className="grid gap-8 xl:grid-cols-[1.65fr,1fr]">
+          
+          {/* LEFT: CLIENT MANAGEMENT */}
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+              <h2 className="text-2xl font-black text-slate-900">Daftar Klien Aktif</h2>
+              <div className="relative w-full sm:w-80 group">
+                <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors" size={18} />
+                <input
+                  type="text"
+                  placeholder="Cari klien berdasarkan nama..."
+                  className="w-full pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl text-sm font-bold text-slate-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all placeholder:font-medium placeholder:text-slate-300"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {["Semua", "Aktif", "Perlu Perhatian", "Selesai"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all border ${
-                  activeTab === tab
-                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                    : "bg-gray-900 text-gray-500 hover:bg-gray-800 border-white/[0.06]"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="space-y-4">
-            {dashboard.clients.length > 0 ? (
-              dashboard.clients.map((client) => (
-                <Link
-                  key={client.id}
-                  href={`/nutritionist/clients/${client.id}`}
-                  className="block glass-panel rounded-2xl border border-white/[0.1] p-5 transition-all hover:shadow-xl hover:shadow-black/20 hover:border-emerald-500/30 group"
+            {/* Tabs Navigation */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              {["Semua", "Aktif", "Perlu Perhatian", "Selesai"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-6 py-3 rounded-xl text-sm font-black whitespace-nowrap transition-all border ${
+                    activeTab === tab
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xl shadow-slate-200"
+                      : "bg-white text-slate-500 border-slate-100 hover:bg-slate-50"
+                  }`}
                 >
-                  <div className="flex flex-col md:flex-row md:items-center gap-6">
-                    <div className="flex items-center gap-4 min-w-[220px]">
-                      <div className="relative h-16 w-16 rounded-2xl overflow-hidden ring-4 ring-neutral-50 group-hover:ring-brand-50 transition-all shrink-0">
-                        <Image src={client.avatar_url} alt={client.name} fill className="object-cover" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors">{client.name}</h3>
-                        <p className="text-xs font-medium text-gray-400">{client.program}</p>
-                      </div>
-                    </div>
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-                    <div className="flex-1 space-y-2">
-                      <div className="flex justify-between items-center text-[10px] font-bold mb-1">
-                        <span className="text-gray-500 uppercase tracking-wider">Target Minggu Ini</span>
-                        <span className="text-emerald-400">85%</span>
-                      </div>
-                      <div className="h-2.5 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full w-[85%] transition-all duration-1000" />
-                      </div>
-                    </div>
+            {/* Client List */}
+            <div className="space-y-6">
+              {(dashboard?.clients || []).length > 0 ? (
+                (dashboard?.clients || []).map((client) => (
+                  <Link
+                    key={client.id}
+                    href={`/nutritionist/clients/${client.id}`}
+                    className="block group"
+                  >
+                    <div className="bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-green-200 transition-all duration-300">
+                      <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+                        {/* Profile Info */}
+                        <div className="flex items-center gap-5 min-w-[280px]">
+                          <div className="relative h-20 w-20 rounded-[1.5rem] overflow-hidden border-2 border-slate-50 group-hover:border-green-100 transition-colors">
+                            <Image src={client.avatar_url} alt={client.name} fill className="object-cover" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-black text-slate-900 group-hover:text-green-600 transition-colors">{client.name}</h3>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{client.program}</p>
+                          </div>
+                        </div>
 
-                    <div className="flex flex-wrap items-center gap-4 md:min-w-[320px] justify-end">
-                      <div className="text-right mr-4 hidden sm:block">
-                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Avg. Kalori</p>
-                        <p className="text-sm font-black text-neutral-300">1,650 <span className="text-[10px] font-bold text-neutral-500">kkal</span></p>
+                        {/* Progress Bar */}
+                        <div className="flex-grow space-y-2">
+                          <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-1">
+                            <span className="text-slate-400">Progress Program</span>
+                            <span className="text-green-600">85%</span>
+                          </div>
+                          <div className="h-3 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
+                            <div className="h-full bg-green-500 rounded-full w-[85%] transition-all duration-1000" />
+                          </div>
+                        </div>
+
+                        {/* Actions & Status */}
+                        <div className="flex items-center justify-between lg:justify-end gap-6 min-w-[320px]">
+                          <div className="text-right hidden sm:block">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kepatuhan Diet</p>
+                            <p className="text-lg font-black text-slate-900">Optimal <span className="text-green-500">✓</span></p>
+                          </div>
+                          <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${
+                            client.status === 'on-track' ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'
+                          }`}>
+                            {client.status === 'on-track' ? (
+                              <><FiCheckCircle /> On Track</>
+                            ) : (
+                              <><FiAlertCircle /> Needs Review</>
+                            )}
+                          </div>
+                          <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-green-600 group-hover:text-white transition-all">
+                            <FiChevronRight size={20} />
+                          </div>
+                        </div>
                       </div>
-                      <span className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ${
-                        client.status === 'on-track' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
-                      }`}>
-                        {client.status === 'on-track' ? (
-                          <><span>✓</span> Diary lengkap</>
-                        ) : (
-                          <><span>⚠️</span> 2 hari tidak log</>
-                        )}
-                      </span>
-                      <Button variant="ghost" size="sm" className="text-emerald-400 font-bold hover:bg-emerald-500/10 rounded-xl px-4">
-                        Lihat Detail <FiChevronRight className="ml-1 h-4 w-4" />
-                      </Button>
                     </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <EmptyState 
-                icon="👥" 
-                title="Belum ada klien" 
-                description="Klien yang terdaftar di program Anda akan muncul di sini." 
-              />
-            )}
-            
-            {/* Pagination Placeholder */}
-            <div className="flex justify-center pt-4">
-               <div className="flex gap-2">
-                  {[1, 2, 3].map(i => (
-                    <button key={i} className={`h-10 w-10 rounded-xl font-bold text-sm transition-all ${i === 1 ? 'bg-brand-500 text-white shadow-lg shadow-brand-100' : 'bg-white text-neutral-500 border border-neutral-100 hover:bg-neutral-50'}`}>{i}</button>
-                  ))}
-               </div>
+                  </Link>
+                ))
+              ) : (
+                <EmptyState icon="👥" title="Belum ada klien" description="Klien Anda akan muncul di sini setelah mendaftar program." />
+              )}
             </div>
           </div>
-        </div>
 
-        {/* KANAN: JADWAL & NOTIFIKASI */}
-        <div className="space-y-8">
-          <TiltCard className="rounded-[32px] overflow-hidden">
-          <Card className="border-white/[0.08] glass-panel rounded-[32px] overflow-hidden shadow-sm">
-            <CardHeader className="bg-gray-800/50 border-b border-white/[0.06] px-6 py-5">
-              <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-                <FiCalendar className="text-emerald-400" /> Jadwal Hari Ini
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="relative space-y-10 before:absolute before:inset-0 before:ml-4 before:h-full before:w-0.5 before:bg-neutral-100">
-                {[
-                  { time: "09:00", name: "Budi Santoso", dur: "30m", status: "Selesai" },
-                  { time: "11:30", name: "Siti Aminah", dur: "45m", status: "Berlangsung" },
-                  { time: "14:00", name: "Rizky Pratama", dur: "30m", status: "Mendatang" },
-                ].map((item, idx) => (
-                  <div key={idx} className="relative flex gap-6 items-start pl-10">
-                    <div className={`absolute left-3 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white ring-2 ${
-                      item.status === 'Selesai' ? 'bg-neutral-300 ring-neutral-100' : 
-                      item.status === 'Berlangsung' ? 'bg-brand-500 ring-brand-100 animate-pulse' : 'bg-white ring-brand-200'
-                    }`} />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-sm font-black text-white">{item.time}</span>
-                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${
-                          item.status === 'Selesai' ? 'bg-gray-700 text-gray-400' :
-                          item.status === 'Berlangsung' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400'
-                        }`}>{item.status}</span>
+          {/* RIGHT: SCHEDULE & NOTIFICATIONS */}
+          <div className="space-y-10">
+            
+            {/* Schedule Card */}
+            <TiltCard>
+              <Card className="bg-white border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden">
+                <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-8 py-6">
+                  <CardTitle className="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <FiCalendar className="text-green-600" /> Jadwal Konsultasi
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-10">
+                  <div className="relative space-y-12 before:absolute before:left-[11px] before:top-0 before:h-full before:w-0.5 before:bg-slate-100">
+                    {[
+                      { time: "09:00", name: "Budi Santoso", dur: "30m", status: "Selesai" },
+                      { time: "11:30", name: "Siti Aminah", dur: "45m", status: "Sedang Berjalan" },
+                      { time: "14:00", name: "Rizky Pratama", dur: "30m", status: "Mendatang" },
+                    ].map((item, idx) => (
+                      <div key={idx} className="relative flex gap-8 items-start">
+                        <div className={`absolute left-0 top-1.5 h-6 w-6 rounded-full border-4 border-white shadow-sm ring-1 ring-slate-100 ${
+                          item.status === 'Selesai' ? 'bg-slate-200' : 
+                          item.status === 'Sedang Berjalan' ? 'bg-green-500 animate-pulse' : 'bg-white'
+                        }`} />
+                        <div className="flex-1 pl-10">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-black text-slate-900">{item.time}</span>
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${
+                              item.status === 'Selesai' ? 'bg-slate-100 text-slate-400' :
+                              item.status === 'Sedang Berjalan' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-600'
+                            }`}>{item.status}</span>
+                          </div>
+                          <p className="text-lg font-bold text-slate-700">{item.name}</p>
+                          <p className="text-xs font-medium text-slate-400">Durasi Sesi: {item.dur}</p>
+                          {(item.status === 'Sedang Berjalan') && (
+                            <Button className="mt-6 w-full h-12 rounded-xl bg-green-600 text-white font-black text-xs shadow-lg shadow-green-900/20">Mulai Sesi Video</Button>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-sm font-bold text-gray-300">{item.name}</p>
-                      <p className="text-xs text-gray-600">Durasi: {item.dur}</p>
-                      {(item.status === 'Mendatang' && idx === 2) && (
-                        <Button size="sm" className="mt-4 w-full bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-100">Mulai Sesi</Button>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          </TiltCard>
+                </CardContent>
+              </Card>
+            </TiltCard>
 
-          <TiltCard className="rounded-[32px] overflow-hidden">
-          <Card className="border-white/[0.08] glass-panel rounded-[32px] overflow-hidden shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-white/[0.06] px-6 py-5">
-              <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-                <FiMessageSquare className="text-blue-400" /> Pesan Masuk
-              </CardTitle>
-              <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-white/[0.06]">
-                {dashboard.notifications.unreplied_messages.items.slice(0, 3).map((msg, i) => (
-                  <div key={i} className="p-5 hover:bg-white/[0.03] transition-colors cursor-pointer group">
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{msg.name}</p>
-                      <span className="text-[10px] text-gray-600">{msg.time || '10m lalu'}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 line-clamp-1">{msg.preview || 'Halo dok, saya mau tanya...'}</p>
+            {/* Message Center */}
+            <TiltCard>
+              <Card className="bg-white border-slate-100 rounded-[2.5rem] shadow-sm overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between bg-slate-50/50 border-b border-slate-100 px-8 py-6">
+                  <CardTitle className="text-lg font-black text-slate-900 flex items-center gap-3">
+                    <FiMessageSquare className="text-blue-600" /> Pesan Terbaru
+                  </CardTitle>
+                  <span className="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-900/20">3 Pesan</span>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-slate-50">
+                    {(dashboard?.notifications?.unreplied_messages?.items || []).slice(0, 3).map((msg, i) => (
+                      <div key={i} className="p-8 hover:bg-slate-50 transition-colors cursor-pointer group">
+                        <div className="flex justify-between items-start mb-2">
+                          <p className="text-sm font-black text-slate-900 group-hover:text-green-600 transition-colors">{msg.name}</p>
+                          <span className="text-[10px] font-bold text-slate-300">{msg.time || '10m lalu'}</span>
+                        </div>
+                        <p className="text-sm text-slate-500 font-medium line-clamp-1 leading-relaxed">{msg.preview || 'Halo ahli gizi, saya mau tanya soal...'}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          </TiltCard>
+                  <div className="p-6 bg-slate-50 text-center">
+                    <button className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-green-600 transition-colors">Lihat Semua Pesan</button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TiltCard>
 
-          <TiltCard className="rounded-[32px] overflow-hidden">
-          <Card className="bg-gradient-to-br from-brand-500 to-brand-600 text-white border-none shadow-xl shadow-brand-100 rounded-[32px]">
-            <CardContent className="p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-white/20 rounded-2xl"><FiBell className="h-5 w-5" /></div>
-                <h3 className="font-bold text-lg">Reminder</h3>
-              </div>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3 bg-white/10 p-4 rounded-2xl border border-white/10">
-                  <span className="text-xl">🏆</span>
-                  <div>
-                    <p className="text-sm font-bold">Budi Santoso</p>
-                    <p className="text-xs text-white/80">Milestone 5kg turun!</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 bg-white/10 p-4 rounded-2xl border border-white/10">
-                  <span className="text-xl">🎂</span>
-                  <div>
-                    <p className="text-sm font-bold">Siti Aminah</p>
-                    <p className="text-xs text-white/80">Ulang tahun besok!</p>
-                  </div>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-          </TiltCard>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, icon, color, suffix }: { label: string, value: string | number, icon: React.ReactNode, color: string, suffix?: string }) {
+function StatCard({ label, value, icon, color, bg, suffix }: { label: string, value: string | number, icon: React.ReactNode, color: string, bg: string, suffix?: string }) {
   return (
-    <div className="glass-panel border border-white/[0.1] rounded-[28px] shadow-sm hover:shadow-xl hover:shadow-black/20 transition-all group overflow-hidden relative p-7 flex items-start justify-between">
-      <div className="relative z-10">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">{label}</p>
+    <TiltCard className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+      <div className="relative z-10 flex flex-col justify-between h-full">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">{label}</p>
         <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-black text-white group-hover:text-emerald-400 transition-colors">{value}</span>
-          {suffix && <span className="text-sm font-bold text-gray-500">{suffix}</span>}
+          <span className="text-4xl font-black text-slate-900 group-hover:text-green-600 transition-colors">{value}</span>
+          {suffix && <span className="text-sm font-bold text-slate-400">{suffix}</span>}
         </div>
       </div>
-      <div className={`p-4 rounded-2xl transition-all group-hover:scale-110 duration-500 ${color}`}>
+      <div className={`absolute top-8 right-8 p-4 rounded-2xl ${bg} ${color} transition-transform group-hover:scale-110 duration-500`}>
         {icon}
       </div>
-    </div>
+    </TiltCard>
   );
 }
 
@@ -328,9 +309,9 @@ function getFallbackNutritionistDashboard(): NutritionistDashboardResponse {
       average_rating: 4.8,
     },
     clients: [
-      { id: 1, name: "Budi Santoso", avatar_url: "https://ui-avatars.com/api/?name=Budi+Santoso&background=random", program: "Body Transformation", status: "on-track" },
-      { id: 2, name: "Siti Aminah", avatar_url: "https://ui-avatars.com/api/?name=Siti+Aminah&background=random", program: "Weight Loss", status: "perlu perhatian" },
-      { id: 3, name: "Rizky Pratama", avatar_url: "https://ui-avatars.com/api/?name=Rizky+Pratama&background=random", program: "Muscle Building", status: "on-track" },
+      { id: 1, name: "Budi Santoso", avatar_url: "https://ui-avatars.com/api/?name=Budi+Santoso&background=f0fdf4&color=16a34a&bold=true", program: "Body Transformation", status: "on-track" },
+      { id: 2, name: "Siti Aminah", avatar_url: "https://ui-avatars.com/api/?name=Siti+Aminah&background=f0fdf4&color=16a34a&bold=true", program: "Weight Loss", status: "perlu perhatian" },
+      { id: 3, name: "Rizky Pratama", avatar_url: "https://ui-avatars.com/api/?name=Rizky+Pratama&background=f0fdf4&color=16a34a&bold=true", program: "Muscle Building", status: "on-track" },
     ],
     notifications: {
       meal_plan_pending: { count: 5 },

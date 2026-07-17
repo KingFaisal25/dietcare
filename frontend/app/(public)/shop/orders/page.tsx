@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
+import api from '@/lib/api';
 import { ShopOrder } from '@/types/shop';
 import { FiArrowLeft, FiShoppingBag, FiChevronRight, FiPackage } from 'react-icons/fi';
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
 const fmt = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
@@ -26,20 +26,28 @@ function dateFmt(d: string) {
 }
 
 export default function MyOrdersPage() {
-  const { token } = useAuthStore();
+  const { user, isLoading: authLoading } = useAuthStore();
   const [orders, setOrders] = useState<ShopOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) { setLoading(false); return; }
-    fetch(`${API}/shop/orders`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((d) => setOrders(d.data ?? []))
+    if (authLoading) return;
+    if (!user) { setLoading(false); return; }
+    api.get('/shop/orders')
+      .then((res) => setOrders(res.data.data ?? []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [user, authLoading]);
 
-  if (!token) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={BG}>
+        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-5 px-4" style={BG}>
         <div className="text-5xl">🔒</div>

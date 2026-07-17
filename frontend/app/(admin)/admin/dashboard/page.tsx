@@ -3,19 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
-  LineElement, BarElement, Title, Tooltip, Legend,
+  LineElement, BarElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import {
   FiTrendingUp, FiUsers, FiShoppingBag, FiActivity,
-  FiAlertCircle, FiLoader, FiRefreshCw, FiMoreVertical, FiCheckCircle,
+  FiAlertCircle, FiLoader, FiRefreshCw, FiMoreVertical, FiCheckCircle, FiChevronRight, FiCreditCard
 } from 'react-icons/fi';
 import { toast } from 'sonner';
 import { Scene3DBackground } from '@/components/ui/Scene3DBackground';
 import { TiltCard } from '@/components/ui/TiltCard';
+import { Button } from '@/components/ui/Button';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 interface DashboardStats {
   revenue_this_month: number;
@@ -55,11 +57,11 @@ export default function AdminDashboard() {
       if (results[1].status === 'fulfilled') {
         const cd = results[1].value.data;
         setRevenueChartData({
-          labels: cd.labels || [],
+          labels: cd.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
           datasets: [{
-            label: 'Revenue', data: cd.data || [],
-            borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)',
-            fill: true, tension: 0.4, borderWidth: 2,
+            label: 'Revenue', data: cd.data || [0, 0, 0, 0, 0, 0],
+            borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.05)',
+            fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2
           }],
         });
       }
@@ -77,9 +79,9 @@ export default function AdminDashboard() {
   const clientData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
-      { label: 'Body Goals', data: [40, 50, 45, 60, 70, 85], backgroundColor: '#22c55e' },
-      { label: 'Body for Baby', data: [20, 25, 30, 35, 40, 45], backgroundColor: '#3b82f6' },
-      { label: 'Clinicare', data: [15, 20, 18, 22, 25, 30], backgroundColor: '#ef4444' },
+      { label: 'Body Goals', data: [40, 50, 45, 60, 70, 85], backgroundColor: '#16a34a', borderRadius: 8 },
+      { label: 'Body for Baby', data: [20, 25, 30, 35, 40, 45], backgroundColor: '#3b82f6', borderRadius: 8 },
+      { label: 'Clinicare', data: [15, 20, 18, 22, 25, 30], backgroundColor: '#ef4444', borderRadius: 8 },
     ],
   };
 
@@ -87,38 +89,20 @@ export default function AdminDashboard() {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { backgroundColor: '#0f172a', padding: 12, titleFont: { size: 12, weight: 'bold' as const }, bodyFont: { size: 12 }, displayColors: false },
+      tooltip: { backgroundColor: '#fff', titleColor: '#0f172a', bodyColor: '#64748b', padding: 12, borderColor: '#f1f5f9', borderWidth: 1, titleFont: { size: 12, weight: 'bold' as const }, bodyFont: { size: 12 }, displayColors: true, boxPadding: 6 },
     },
     scales: {
-      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#475569', font: { size: 10 } } },
-      x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10, weight: 'bold' as const } } },
+      y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 10 } }, border: { display: false } },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' as const } }, border: { display: false } },
     },
   };
 
   if (isLoading && !stats.revenue_this_month) {
     return (
-      <div className="flex h-[calc(100vh-100px)] items-center justify-center">
+      <div className="flex h-[80vh] items-center justify-center">
         <div className="text-center space-y-4">
-          <FiLoader className="w-10 h-10 text-green-500 animate-spin mx-auto" />
-          <p className="text-slate-500 font-medium animate-pulse">Memuat data dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-[calc(100vh-100px)] items-center justify-center">
-        <div className="text-center space-y-6 max-w-md px-6">
-          <div className="w-20 h-20 bg-red-500/15 text-red-400 rounded-full flex items-center justify-center mx-auto">
-            <FiAlertCircle size={40} />
-          </div>
-          <h2 className="text-xl font-bold text-white">Gagal Memuat Dashboard</h2>
-          <p className="text-slate-400 text-sm">{error}</p>
-          <button onClick={fetchDashboardData}
-            className="btn-green w-full py-3 text-sm flex items-center justify-center gap-2">
-            <FiRefreshCw size={18} /> Coba Lagi
-          </button>
+          <div className="animate-spin h-12 w-12 border-4 border-green-600 border-t-transparent rounded-full mx-auto" />
+          <p className="text-slate-500 font-black uppercase tracking-widest text-[10px]">Memuat Dashboard...</p>
         </div>
       </div>
     );
@@ -126,224 +110,239 @@ export default function AdminDashboard() {
 
   const STAT_CARDS = [
     { label: 'Revenue Bulan Ini', value: formatRupiah(stats.revenue_this_month),
-      sub: `${stats.growth_percent >= 0 ? '+' : ''}${stats.growth_percent}% dari bulan lalu`,
-      icon: FiTrendingUp, iconBg: 'rgba(34,197,94,0.15)', iconColor: '#4ade80', subColor: stats.growth_percent >= 0 ? '#4ade80' : '#f87171' },
+      sub: `${stats.growth_percent >= 0 ? '+' : ''}${stats.growth_percent}% vs Bulan Lalu`,
+      icon: FiTrendingUp, bg: 'bg-green-50', color: 'text-green-600', trend: stats.growth_percent >= 0 ? 'up' : 'down' },
     { label: 'Klien Aktif', value: String(stats.active_clients),
       sub: 'Sedang dalam program', icon: FiUsers,
-      iconBg: 'rgba(59,130,246,0.15)', iconColor: '#60a5fa', subColor: '#64748b' },
+      bg: 'bg-blue-50', color: 'text-blue-600' },
     { label: 'Transaksi Hari Ini', value: String(stats.today_transactions.count),
-      sub: formatRupiah(stats.today_transactions.amount), icon: FiShoppingBag,
-      iconBg: 'rgba(245,158,11,0.15)', iconColor: '#fbbf24', subColor: '#fbbf24' },
+      sub: formatRupiah(stats.today_transactions.amount), icon: FiCreditCard,
+      bg: 'bg-amber-50', color: 'text-amber-600' },
     { label: 'Ahli Gizi Aktif', value: String(stats.active_nutritionists),
-      sub: 'Online & melayani', icon: FiActivity,
-      iconBg: 'rgba(168,85,247,0.15)', iconColor: '#c084fc', subColor: '#64748b' },
+      sub: 'Online & Melayani', icon: FiActivity,
+      bg: 'bg-purple-50', color: 'text-purple-600' },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-up relative">
+    <div className="min-h-screen bg-slate-50/50 pb-20 relative overflow-hidden">
       <Scene3DBackground subtle />
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 relative z-10">
-        <div>
-          <h1 className="text-2xl font-extrabold text-white">Admin Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Ringkasan performa bisnis DietCare.</p>
-        </div>
-        <button onClick={fetchDashboardData} disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border border-white/[0.06] text-slate-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-50"
-          style={{ background: '#1e293b' }}>
-          {isLoading ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : <FiRefreshCw className="w-3.5 h-3.5" />}
-          Refresh
-        </button>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-        {STAT_CARDS.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <TiltCard key={i} className={`stat-card animate-fade-up stagger-${i + 1} glass-panel border border-white/10`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                     style={{ background: s.iconBg }}>
-                  <Icon className="w-5 h-5" style={{ color: s.iconColor }} />
-                </div>
-              </div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{s.label}</p>
-              <h3 className="text-2xl font-extrabold text-white mt-1">{s.value}</h3>
-              <p className="text-[11px] font-semibold mt-1" style={{ color: s.subColor }}>{s.sub}</p>
-            </TiltCard>
-          );
-        })}
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
-        {/* Revenue Chart */}
-        <div className="p-6 rounded-[18px] border border-white/[0.06]" style={{ background: '#1e293b' }}>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-sm font-bold text-white">Grafik Revenue</h3>
-            <div className="flex rounded-xl p-1 border border-white/[0.06]" style={{ background: '#273449' }}>
-              {['daily', 'weekly', 'monthly'].map((p) => (
-                <button key={p} onClick={() => setRevenuePeriod(p)}
-                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                    revenuePeriod === p ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'text-slate-500 hover:text-slate-300'
-                  }`}>{p}</button>
-              ))}
-            </div>
+      
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 space-y-12 relative z-10">
+        
+        {/* HEADER SECTION */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-2">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-green-50 text-green-700 text-[11px] font-black uppercase tracking-[0.2em] mb-2 border border-green-100">
+              Platform Analytics
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Admin <span className="text-green-600">Overview</span>
+            </h1>
+            <p className="text-slate-500 font-medium">Ringkasan performa platform DietCare secara real-time.</p>
           </div>
-          <div className="h-[280px]">
-            {revenueChartData ? (
-              <Line data={revenueChartData} options={chartOpts} />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-600">Memuat...</div>
-            )}
-          </div>
+          <button onClick={fetchDashboardData} disabled={isLoading}
+            className="h-16 px-8 rounded-[1.25rem] bg-white border border-slate-100 font-black text-sm text-slate-900 shadow-sm flex items-center gap-3 group transition-all hover:shadow-xl hover:-translate-y-1">
+            <FiRefreshCw className={`w-4 h-4 text-green-600 ${isLoading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+            Refresh Data
+          </button>
         </div>
 
-        {/* Client Chart */}
-        <div className="p-6 rounded-[18px] border border-white/[0.06]" style={{ background: '#1e293b' }}>
-          <h3 className="text-sm font-bold text-white mb-6">Klien Baru per Program</h3>
-          <div className="h-[280px]">
-            <Bar data={clientData} options={{
-              ...chartOpts,
-              plugins: {
-                ...chartOpts.plugins,
-                legend: { position: 'bottom' as const, labels: { boxWidth: 8, usePointStyle: true, color: '#94a3b8', font: { size: 10, weight: 'bold' as const } } },
-              },
-              scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } },
-            }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Transactions Table */}
-      <div className="rounded-[18px] border border-white/[0.06] overflow-hidden relative z-10 glass-panel" style={{ background: 'rgba(30, 41, 59, 0.62)' }}>
-        <div className="px-6 py-4 border-b border-white/[0.06] flex justify-between items-center">
-          <h3 className="text-sm font-bold text-white">Transaksi Terbaru</h3>
-          <button className="text-[10px] font-bold text-green-400 uppercase tracking-widest hover:text-green-300 transition-colors">Lihat Semua</button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.04]">
-                {['Kode', 'Klien', 'Program', 'Total', 'Status', 'Tanggal'].map(h => (
-                  <th key={h} className="text-left px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {recentTransactions.map((t: any) => (
-                <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-4 font-bold text-white font-mono text-xs">{t.order_code || `#${t.id}`}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-bold text-green-400" style={{ background: 'rgba(34,197,94,0.15)' }}>
-                        {t.user?.name?.charAt(0)}
-                      </div>
-                      <span className="font-semibold text-slate-200 text-xs">{t.user?.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg text-slate-400" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      {t.program?.name}
+        {/* STAT CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {STAT_CARDS.map((s, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+              <TiltCard className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden">
+                <div className="flex items-center justify-between mb-8">
+                  <div className={`p-4 rounded-2xl ${s.bg} ${s.color} transition-transform group-hover:scale-110 duration-500`}>
+                    <s.icon size={24} />
+                  </div>
+                  {s.trend && (
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${s.trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      {s.sub}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 font-extrabold text-yellow-400 text-xs">{formatRupiah(t.final_amount)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                      t.status === 'paid' ? 'bg-green-500/15 text-green-400'
-                      : t.status === 'pending' ? 'bg-amber-500/15 text-amber-400'
-                      : 'bg-red-500/15 text-red-400'
-                    }`}>{t.status}</span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500 text-xs">
-                    {new Date(t.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                  </td>
-                </tr>
-              ))}
-              {recentTransactions.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-20 text-center">
-                  <FiShoppingBag className="w-10 h-10 text-slate-700 mx-auto mb-2" />
-                  <p className="text-sm text-slate-500">Belum ada transaksi</p>
-                </td></tr>
-              )}
-            </tbody>
-          </table>
+                  )}
+                </div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.label}</p>
+                <h3 className="text-3xl font-black text-slate-900 group-hover:text-green-600 transition-colors">{s.value}</h3>
+                {!s.trend && <p className="text-[10px] font-bold text-slate-400 mt-2">{s.sub}</p>}
+              </TiltCard>
+            </motion.div>
+          ))}
         </div>
-      </div>
 
-      {/* Alerts + Workload */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
-        {/* Alerts */}
-        <div className="p-6 rounded-[18px] border border-white/[0.06]" style={{ background: '#1e293b' }}>
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)' }}>
-              <FiAlertCircle className="w-4 h-4 text-red-400" />
+        {/* CHARTS SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Revenue Chart */}
+          <TiltCard className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div className="flex justify-between items-center mb-10">
+              <h3 className="text-xl font-black text-slate-900">Performa Pendapatan</h3>
+              <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
+                {['daily', 'weekly', 'monthly'].map((p) => (
+                  <button key={p} onClick={() => setRevenuePeriod(p)}
+                    className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                      revenuePeriod === p ? 'bg-white text-green-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'
+                    }`}>{p}</button>
+                ))}
+              </div>
             </div>
-            <h3 className="text-sm font-bold text-white">Peringatan Sistem</h3>
-          </div>
-          <div className="space-y-3">
-            {adminAlerts.map((alert: any, idx: number) => (
-              <div key={idx} className="p-4 rounded-2xl border border-white/[0.06] flex items-center justify-between hover:border-red-500/20 transition-all"
-                   style={{ background: '#273449' }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-red-400"
-                       style={{ background: 'rgba(239,68,68,0.15)' }}>
-                    {alert.user?.name?.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-xs">{alert.user?.name}</p>
-                    <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mt-0.5">Meal Plan Delay &gt; 2 Hari</p>
-                  </div>
-                </div>
-                <button className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-all">
-                  Handle
-                </button>
-              </div>
-            ))}
-            {adminAlerts.length === 0 && (
-              <div className="py-12 text-center">
-                <FiCheckCircle className="w-8 h-8 text-green-500/30 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Semua berjalan lancar!</p>
-              </div>
-            )}
-          </div>
+            <div className="h-[300px]">
+              {revenueChartData ? (
+                <Line data={revenueChartData} options={chartOpts} />
+              ) : (
+                <div className="flex h-full items-center justify-center text-slate-300 font-black uppercase tracking-[0.2em] text-[10px]">Memuat Grafik...</div>
+              )}
+            </div>
+          </TiltCard>
+
+          {/* Client Chart */}
+          <TiltCard className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <h3 className="text-xl font-black text-slate-900 mb-10">Distribusi Program</h3>
+            <div className="h-[300px]">
+              <Bar data={clientData} options={{
+                ...chartOpts,
+                plugins: {
+                  ...chartOpts.plugins,
+                  legend: { display: true, position: 'bottom' as const, labels: { boxWidth: 8, usePointStyle: true, color: '#94a3b8', font: { size: 10, weight: 'bold' as const }, padding: 20 } },
+                },
+                scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } },
+              }} />
+            </div>
+          </TiltCard>
         </div>
 
-        {/* Workload */}
-        <div className="p-6 rounded-[18px] border border-white/[0.06]" style={{ background: '#1e293b' }}>
-          <h3 className="text-sm font-bold text-white mb-5">Beban Kerja Ahli Gizi</h3>
-          <div className="space-y-5">
-            {workloadData.map((w: any, idx: number) => {
-              const pct = (w.active_clients / w.max_clients) * 100;
-              const barColor = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : '#22c55e';
-              const txtColor = pct >= 100 ? '#f87171' : pct >= 80 ? '#fbbf24' : '#4ade80';
-              return (
-                <div key={idx} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-bold"
-                           style={{ background: `${barColor}20`, color: txtColor }}>
-                        {w.name?.charAt(0)}
-                      </div>
-                      <span className="font-semibold text-slate-200 text-xs">{w.name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-500">{w.active_clients}/{w.max_clients}</span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    <div className="h-full rounded-full transition-all duration-1000"
-                         style={{ width: `${Math.min(pct, 100)}%`, background: barColor }} />
-                  </div>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-right" style={{ color: txtColor }}>
-                    {w.status}
-                  </p>
-                </div>
-              );
-            })}
-            {workloadData.length === 0 && (
-              <div className="py-12 text-center text-slate-600">Tidak ada data</div>
-            )}
+        {/* TRANSACTIONS TABLE */}
+        <TiltCard className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+            <h3 className="text-xl font-black text-slate-900 flex items-center gap-3">
+              <FiShoppingBag className="text-green-600" /> Transaksi Terbaru
+            </h3>
+            <button className="text-[10px] font-black text-green-600 uppercase tracking-widest hover:underline flex items-center gap-2">
+              Lihat Semua Transaksi <FiChevronRight />
+            </button>
           </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  {['Kode', 'Klien', 'Program', 'Total', 'Status', 'Tanggal'].map(h => (
+                    <th key={h} className="text-left px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {recentTransactions.map((t: any) => (
+                  <tr key={t.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-10 py-6 font-black text-slate-900 font-mono text-xs">{t.order_code || `#${t.id}`}</td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-xs font-black text-green-600 border border-green-100 group-hover:scale-110 transition-transform">
+                          {t.user?.name?.charAt(0)}
+                        </div>
+                        <span className="font-bold text-slate-900 text-sm">{t.user?.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6">
+                      <span className="text-[10px] font-black px-3 py-1.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-100 uppercase tracking-widest">
+                        {t.program?.name}
+                      </span>
+                    </td>
+                    <td className="px-10 py-6 font-black text-slate-900 text-sm">{formatRupiah(t.final_amount)}</td>
+                    <td className="px-10 py-6">
+                      <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest ${
+                        t.status === 'paid' ? 'bg-green-50 text-green-600'
+                        : t.status === 'pending' ? 'bg-amber-50 text-amber-600'
+                        : 'bg-red-50 text-red-600'
+                      }`}>{t.status}</span>
+                    </td>
+                    <td className="px-10 py-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                      {new Date(t.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </TiltCard>
+
+        {/* ALERTS & WORKLOAD */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* System Alerts */}
+          <TiltCard className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-10">
+              <div className="p-3 rounded-2xl bg-red-50 text-red-600">
+                <FiAlertCircle size={24} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900">Peringatan Sistem</h3>
+            </div>
+            <div className="space-y-4">
+              {adminAlerts.map((alert: any, idx: number) => (
+                <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:border-red-200 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-sm font-black text-red-500 shadow-sm group-hover:scale-110 transition-transform">
+                      {alert.user?.name?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-900 text-sm">{alert.user?.name}</p>
+                      <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-1">Meal Plan Delay &gt; 2 Hari</p>
+                    </div>
+                  </div>
+                  <Button className="h-10 px-6 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all">
+                    Handle
+                  </Button>
+                </div>
+              ))}
+              {adminAlerts.length === 0 && (
+                <div className="py-20 text-center">
+                  <div className="w-20 h-20 bg-green-50 rounded-[2.5rem] flex items-center justify-center text-green-600 mx-auto mb-6">
+                    <FiCheckCircle size={40} />
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 mb-2">Semua Aman!</h3>
+                  <p className="text-slate-400 font-medium">Tidak ada antrean tertunda yang perlu ditangani.</p>
+                </div>
+              )}
+            </div>
+          </TiltCard>
+
+          {/* Workload */}
+          <TiltCard className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-10">
+              <div className="p-3 rounded-2xl bg-purple-50 text-purple-600">
+                <FiActivity size={24} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900">Beban Kerja Ahli Gizi</h3>
+            </div>
+            <div className="space-y-8">
+              {workloadData.map((w: any, idx: number) => {
+                const pct = (w.active_clients / w.max_clients) * 100;
+                const barColor = pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-green-500';
+                const txtColor = pct >= 100 ? 'text-red-500' : pct >= 80 ? 'text-amber-500' : 'text-green-600';
+                return (
+                  <div key={idx} className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xs font-black ${txtColor}`}>
+                          {w.name?.charAt(0)}
+                        </div>
+                        <span className="font-black text-slate-900 text-sm">{w.name}</span>
+                      </div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{w.active_clients} / {w.max_clients} Klien</span>
+                    </div>
+                    <div className="h-3 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-0.5">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(pct, 100)}%` }}
+                        transition={{ duration: 1.5, delay: idx * 0.1 }}
+                        className={`h-full ${barColor} rounded-full`}
+                      />
+                    </div>
+                    <p className={`text-[9px] font-black uppercase tracking-widest text-right ${txtColor}`}>
+                      {w.status}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </TiltCard>
         </div>
       </div>
     </div>

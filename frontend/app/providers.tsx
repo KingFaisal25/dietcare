@@ -1,11 +1,13 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Toaster } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { useAuthStore } from "@/lib/store/authStore";
+import { getUserApi } from "@/lib/auth";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -37,10 +39,29 @@ export function useThemeMode() {
   return context;
 }
 
+/**
+ * AuthInitializer: Fetches the current session on mount.
+ * Sets isLoading=false regardless of outcome, preventing the checkout page
+ * from being stuck in an infinite loading state.
+ */
+function AuthInitializer() {
+  const { setUser, clearAuth } = useAuthStore();
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    getUserApi()
+      .then((user) => setUser(user))
+      .catch(() => clearAuth());
+  }, [setUser, clearAuth]);
+
+  return null;
+}
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<ThemeMode>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -54,66 +75,31 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem(storageKey) as ThemeMode | null;
-    const initialTheme = savedTheme ?? "system";
-    const nextResolvedTheme = resolveTheme(initialTheme);
-
-    setTheme(initialTheme);
-    setResolvedTheme(nextResolvedTheme);
-    document.documentElement.dataset.theme = nextResolvedTheme;
-    document.documentElement.classList.toggle("dark", nextResolvedTheme === "dark");
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      const currentTheme = (window.localStorage.getItem(storageKey) as ThemeMode | null) ?? "system";
-      if (currentTheme === "system") {
-        const systemTheme = media.matches ? "dark" : "light";
-        setResolvedTheme(systemTheme);
-        document.documentElement.dataset.theme = systemTheme;
-        document.documentElement.classList.toggle("dark", systemTheme === "dark");
-      }
-    };
-
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
+    // Force consistent light-green theme
+    document.documentElement.dataset.theme = "light";
+    document.documentElement.classList.remove("dark");
+    window.localStorage.setItem(storageKey, "light");
   }, []);
 
   const themeValue = useMemo<ThemeContextValue>(
     () => ({
-      theme,
-      resolvedTheme,
-      setTheme: (nextTheme) => {
-        const nextResolvedTheme =
-          nextTheme === "system" ? resolveTheme("system") : nextTheme;
-
-        setTheme(nextTheme);
-        setResolvedTheme(nextResolvedTheme);
-        window.localStorage.setItem(storageKey, nextTheme);
-        document.documentElement.dataset.theme = nextResolvedTheme;
-        document.documentElement.classList.toggle("dark", nextResolvedTheme === "dark");
-      },
-      toggleTheme: () => {
-        const nextTheme: ThemeMode = resolvedTheme === "dark" ? "light" : "dark";
-        const nextResolvedTheme = nextTheme;
-
-        setTheme(nextTheme);
-        setResolvedTheme(nextResolvedTheme);
-        window.localStorage.setItem(storageKey, nextTheme);
-        document.documentElement.dataset.theme = nextResolvedTheme;
-        document.documentElement.classList.toggle("dark", nextResolvedTheme === "dark");
-      },
+      theme: "light",
+      resolvedTheme: "light",
+      setTheme: () => {},
+      toggleTheme: () => {},
     }),
-    [resolvedTheme, theme]
+    []
   );
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthInitializer />
       <ThemeContext.Provider value={themeValue}>
         <Toaster
           position="bottom-right"
           richColors
           closeButton
-          theme={resolvedTheme}
+          theme="light"
           toastOptions={{
             style: {
               borderRadius: "24px",

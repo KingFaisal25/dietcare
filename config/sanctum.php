@@ -15,12 +15,25 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-        // Sanctum::currentRequestHost(),
+    'stateful' => array_values(array_filter(array_map(
+        static fn (string $domain) => trim($domain),
+        explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
+            '%s%s',
+            'localhost,localhost:3000,localhost:3001,127.0.0.1,127.0.0.1:3000,127.0.0.1:8000,::1',
+            Sanctum::currentApplicationUrlWithPort() ? ','.Sanctum::currentApplicationUrlWithPort() : '',
+        )))
     ))),
+
+    /*
+    |--------------------------------------------------------------------------
+    | SPA Cookie Authentication
+    |--------------------------------------------------------------------------
+    |
+    | Sanctum SPA auth uses session cookies (not bearer tokens). Ensure CORS
+    | supports_credentials is true in config/cors.php for cross-origin SPAs.
+    |
+    */
+    'supports_credentials' => true,
 
     /*
     |--------------------------------------------------------------------------

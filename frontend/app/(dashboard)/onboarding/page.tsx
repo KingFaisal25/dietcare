@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { AxiosError } from 'axios';
@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
 import { calculateBMI, calculateNutrition, NutritionInput, ActivityLevel, TargetType } from '@/lib/nutrition';
 import { useNutritionStore } from '@/store/useNutritionStore';
+import { Scene3DBackground } from '@/components/ui/Scene3DBackground';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiZap, FiChevronLeft, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
 
 // ═══════════════════════════════════════════════════════════
 //  TYPES
@@ -229,28 +232,44 @@ export default function OnboardingPage() {
   // ═══════════════════════════════════════════════════════════
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white pb-20 relative overflow-hidden">
+      <Scene3DBackground subtle />
+      
       {/* ── Header ──────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
-        <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white font-bold text-sm">DC</div>
-              <span className="font-bold text-gray-900">DietCare <span className="text-primary"></span></span>
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-200">
+                <FiZap size={20} />
+              </div>
+              <span className="text-xl font-black text-slate-900 tracking-tight">DietCare <span className="text-green-600">Onboarding</span></span>
             </div>
-            <span className="text-sm text-gray-400">Step {currentStep + 1} dari {STEPS.length}</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+              <span className="text-sm font-black text-green-600">{Math.round(((currentStep + 1) / STEPS.length) * 100)}%</span>
+            </div>
           </div>
 
-          {/* ── Progress Bar ─────────────────────────── */}
-          <div className="flex items-center gap-1">
+          {/* ── Modern Progress Indicator ─────────────────────────── */}
+          <div className="flex items-center gap-3">
             {STEPS.map((label, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                <div className={`h-1.5 w-full rounded-full transition-all duration-500 ${
-                  i < currentStep ? 'bg-primary' : i === currentStep ? 'bg-primary/70' : 'bg-gray-200'
-                }`} />
-                <span className={`text-[10px] font-medium hidden sm:block transition-colors ${
-                  i <= currentStep ? 'text-primary' : 'text-gray-400'
-                }`}>{label}</span>
+              <div key={i} className="flex-1">
+                <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: i <= currentStep ? '100%' : '0%' }}
+                    transition={{ duration: 0.8, ease: "circOut" }}
+                    className={`absolute inset-0 rounded-full ${
+                      i < currentStep ? 'bg-green-600' : i === currentStep ? 'bg-green-500' : 'bg-transparent'
+                    }`}
+                  />
+                </div>
+                <span className={`mt-3 text-[10px] font-black uppercase tracking-widest block transition-colors duration-500 ${
+                  i <= currentStep ? 'text-green-600' : 'text-slate-300'
+                }`}>
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -258,9 +277,17 @@ export default function OnboardingPage() {
       </div>
 
       {/* ── Form Container ──────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 sm:p-8">
+      <div className="max-w-4xl mx-auto px-6 py-12 relative z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.5, ease: "circOut" }}
+            className="bg-white rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.06)] border border-slate-100 overflow-hidden"
+          >
+            <div className="p-8 md:p-16">
 
             {/* ═══════════ STEP 1: Data Fisik ═══════════ */}
             {currentStep === 0 && (
@@ -648,39 +675,38 @@ export default function OnboardingPage() {
           </div>
 
           {/* ── Navigation Buttons ──────────────────── */}
-          <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:px-8 flex items-center justify-between gap-3">
-            <Button
-              variant="ghost"
+          <div className="border-t border-slate-50 bg-slate-50/30 px-8 py-8 md:px-16 flex items-center justify-between gap-6">
+            <button
               onClick={prevStep}
               disabled={currentStep === 0}
-              className={currentStep === 0 ? 'invisible' : ''}
+              className={`flex items-center gap-2 font-black text-sm uppercase tracking-widest transition-all ${
+                currentStep === 0 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-slate-900'
+              }`}
             >
-              <svg className="mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-              </svg>
+              <FiChevronLeft size={20} />
               Kembali
-            </Button>
+            </button>
 
             {currentStep < STEPS.length - 1 ? (
-              <Button onClick={nextStep} size="lg" className="min-w-[140px] shadow-lg shadow-primary/20">
+              <Button onClick={nextStep} size="xl" className="min-w-[200px] shadow-2xl shadow-green-900/20 rounded-2xl group">
                 Lanjut
-                <svg className="ml-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
-                </svg>
+                <FiChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
               </Button>
             ) : (
               <Button
                 onClick={handleSubmit}
                 isLoading={isSubmitting}
-                size="lg"
-                className="min-w-[180px] shadow-lg shadow-primary/20"
+                size="xl"
+                className="min-w-[240px] shadow-2xl shadow-green-900/20 rounded-2xl bg-green-600 hover:bg-green-700"
               >
-                🚀 Konfirmasi & Mulai Program
+                Mulai Program Saya
+                <FiCheckCircle className="ml-2" size={20} />
               </Button>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
+    </div>
     </div>
   );
 }

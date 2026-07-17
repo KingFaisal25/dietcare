@@ -10,11 +10,16 @@ import {
   ChevronRight,
   Heart,
   Phone,
+  Sparkles,
+  MessageCircle,
 } from "lucide-react";
 import ProgramCard from "@/components/ProgramCard";
 import ProgramTypeToggle from "@/components/ProgramTypeToggle";
 import StickyBuyButton from "@/components/StickyBuyButton";
+import { TiltCard } from "@/components/ui/TiltCard";
+import { Button } from "@/components/ui/Button";
 import { getWaLink } from "@/lib/wa";
+import { motion, AnimatePresence } from "framer-motion";
 
 const COCOK_UNTUK = [
   { emoji: "🤰", text: "Ibu hamil trimester 1, 2, dan 3" },
@@ -102,127 +107,246 @@ export default function BodyForBabyPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const plans = programType === "intensif" ? INTENSIF_PLANS : SIMPLE_PLANS;
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Program Body for Baby",
+    "description": "Program gizi khusus ibu hamil dan menyusui bersama ahli gizi tersertifikasi.",
+    "brand": {
+      "@type": "Brand",
+      "name": "DietCare"
+    },
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "299900",
+      "highPrice": "3549000",
+      "priceCurrency": "IDR",
+      "offerCount": "3"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.95",
+      "reviewCount": "850"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <StickyBuyButton href="/checkout?program=baby-intensive-essentials" label="Beli Sekarang" />
 
       {/* ── HERO ────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-50 pb-16 pt-24 lg:pb-24 lg:pt-32">
-        <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-pink-100/50 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-secondary-50 pb-20 pt-28 lg:pb-32 lg:pt-40">
+        <div className="absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-brand-100/40 blur-[120px]" />
+        <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-secondary-100/30 blur-[100px]" />
 
-        <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
-          <nav className="mb-8 flex items-center justify-center gap-2 text-sm text-gray-400">
-            <Link href="/" className="hover:text-pink-600">Beranda</Link>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <Link href="/program" className="hover:text-pink-600">Program</Link>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="font-medium text-gray-700">Body for Baby</span>
-          </nav>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col items-center text-center">
+            <nav className="mb-10 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+              <Link href="/" className="hover:text-brand-600 transition-colors">Beranda</Link>
+              <ChevronRight className="h-3 w-3" />
+              <Link href="/program" className="hover:text-brand-600 transition-colors">Program</Link>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-neutral-900">Body for Baby</span>
+            </nav>
 
-          <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-4 py-1.5 text-xs font-bold text-pink-700">
-              <Heart className="h-3.5 w-3.5" />
-              Direkomendasikan POGI & IDAI
-            </span>
-          </div>
+            <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-[11px] font-black uppercase tracking-widest text-brand-700 shadow-sm border border-brand-100">
+                <Heart className="h-3.5 w-3.5 fill-brand-500" />
+                Direkomendasikan POGI & IDAI
+              </span>
+            </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-            Nutrisi Optimal untuk <span className="text-pink-600">Ibu dan Buah Hati</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-500 leading-relaxed">
-            Program gizi khusus ibu hamil, menyusui, dan persiapan kehamilan.
-            Didampingi ahli gizi yang berpengalaman di bidang gizi maternal.
-          </p>
+            <h1 className="text-5xl font-black tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
+              Nutrisi Optimal untuk <span className="text-brand-600 relative inline-block">
+                Ibu & Buah Hati
+                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 100 10" preserveAspectRatio="none">
+                  <path d="M0 5 Q 25 0, 50 5 T 100 5" stroke="currentColor" strokeWidth="4" fill="transparent" />
+                </svg>
+              </span>
+            </h1>
+            <p className="mx-auto mt-10 max-w-2xl text-lg font-medium text-neutral-500 leading-relaxed">
+              Program gizi komprehensif untuk masa kehamilan, menyusui, dan persiapan promil dengan pendampingan personal.
+            </p>
 
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#harga" className="inline-flex items-center gap-2 rounded-2xl bg-pink-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-200 transition hover:bg-pink-700">
-              Lihat Harga <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href={getWaLink("Halo kak, saya sedang hamil/menyusui/promil dan ingin tanya tentang Program Body for Baby")}
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl border-2 border-pink-200 px-8 py-4 text-base font-bold text-pink-700 transition hover:bg-pink-50"
-            >
-              <Phone className="h-4 w-4" /> Konsultasi Gratis
-            </a>
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link href="#harga">
+                <Button size="lg" className="h-14 px-10 shadow-green group">
+                  Lihat Harga Program
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <a
+                href={getWaLink("Halo kak, saya sedang hamil/menyusui/promil dan ingin tanya tentang Program Body for Baby")}
+                target="_blank" rel="noopener noreferrer"
+              >
+                <Button variant="secondary" size="lg" className="h-14 px-10">
+                  <Phone className="mr-2 h-5 w-5" />
+                  Konsultasi Gratis
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── COCOK UNTUK ─────────────────────────────────── */}
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="mb-12 text-center text-3xl font-extrabold text-gray-900">Cocok Untuk Siapa?</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+      <section className="py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-brand-600">Target Audience</h2>
+            <h3 className="text-4xl font-black text-neutral-900 tracking-tight sm:text-5xl">Siapa yang Membutuhkan Program Ini?</h3>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {COCOK_UNTUK.map((item, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-6 transition hover:border-pink-200 hover:bg-pink-50/30">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-pink-50 text-2xl">{item.emoji}</span>
-                <p className="text-sm font-medium text-gray-700">{item.text}</p>
-              </div>
+              <TiltCard key={i} className="flex flex-col items-center text-center gap-6 p-8 rounded-[2.5rem] bg-white border border-neutral-100 shadow-card hover:shadow-float transition-all">
+                <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[2rem] bg-brand-50 text-4xl shadow-sm border border-brand-100">
+                  {item.emoji}
+                </span>
+                <p className="text-sm font-bold text-neutral-800 leading-relaxed">{item.text}</p>
+              </TiltCard>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── APA YANG DIDAPAT ────────────────────────────── */}
-      <section className="bg-pink-50/60 py-20 lg:py-28">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="mb-12 text-center text-3xl font-extrabold text-gray-900">Apa yang Kamu Dapatkan?</h2>
-          <div className="mx-auto grid max-w-2xl gap-4">
-            {BENEFITS.map((b, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-2xl bg-white px-6 py-5 shadow-sm">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-pink-500 text-white">
-                  <Check className="h-4 w-4" />
+      <section className="bg-surface-50 py-24 lg:py-32 rounded-[4rem] mx-4 lg:mx-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="relative">
+              <div className="absolute -inset-4 bg-brand-500/10 rounded-[3rem] blur-3xl" />
+              <div className="relative aspect-square rounded-[3rem] bg-gradient-to-br from-brand-100 to-brand-50 border border-brand-200 flex items-center justify-center p-12">
+                <Baby className="w-full h-full text-brand-500 opacity-20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-float border border-white max-w-[80%]">
+                    <h4 className="text-2xl font-black text-neutral-900 mb-6">Fokus Utama Program</h4>
+                    <div className="space-y-4">
+                      {BENEFITS.map((b, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-white">
+                            <Check className="h-3.5 w-3.5 stroke-[3px]" />
+                          </div>
+                          <p className="text-sm font-bold text-neutral-700">{b}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm font-semibold text-gray-700">{b}</p>
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-brand-600">Program Benefits</h2>
+                <h3 className="text-4xl font-black text-neutral-900 tracking-tight sm:text-5xl">Pendampingan Gizi Terbaik untuk Bunda</h3>
+              </div>
+              <p className="text-lg font-medium text-neutral-500 leading-relaxed">
+                Kami memahami bahwa setiap fase kehamilan dan menyusui membutuhkan perhatian nutrisi yang berbeda. Ahli gizi kami akan membantu Bunda menavigasi setiap langkah dengan aman.
+              </p>
+              <div className="pt-8 grid grid-cols-2 gap-6">
+                <div className="p-6 rounded-3xl bg-white shadow-card border border-neutral-100">
+                  <p className="text-3xl font-black text-brand-600 mb-1">100%</p>
+                  <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Aman & Alami</p>
+                </div>
+                <div className="p-6 rounded-3xl bg-white shadow-card border border-neutral-100">
+                  <p className="text-3xl font-black text-brand-600 mb-1">24/7</p>
+                  <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Chat Support</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── TABEL HARGA ─────────────────────────────────── */}
-      <section id="harga" className="scroll-mt-20 bg-gray-50 py-20 lg:py-28">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-12 flex flex-col items-center gap-6 text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              Harga Program {programType === "intensif" ? "Intensif" : "Simple"}
-            </h2>
+      <section id="harga" className="scroll-mt-24 py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-16 flex flex-col items-center gap-8 text-center">
+            <div className="space-y-4">
+              <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-brand-600">Pricing Plans</h2>
+              <h3 className="text-4xl font-black text-neutral-900 tracking-tight sm:text-5xl">
+                Harga Program {programType === "intensif" ? "Intensif" : "Simple"}
+              </h3>
+            </div>
             <ProgramTypeToggle activeType={programType} onChange={setProgramType} />
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {plans.map((plan) => (
-              <ProgramCard key={plan.slug} programName={plan.name} slug={plan.slug} tagline={plan.tagline} price={plan.price} pricePerMonth={plan.pricePerMonth} duration={plan.duration} features={plan.features} isPopular={"isPopular" in plan && Boolean(plan.isPopular)} checkoutUrl={`/checkout?program=${plan.slug}`} waMessage={`Halo kak, saya tertarik dengan paket ${plan.name} dari Program Body for Baby.`} />
+              <ProgramCard key={plan.slug} programName={plan.name} slug={plan.slug} tagline={plan.tagline} price={plan.price} pricePerMonth={plan.pricePerMonth} duration={plan.duration} features={plan.features} isPopular={"isPopular" in plan && Boolean(plan.isPopular)} checkoutUrl={`/checkout?program=${plan.slug}`} />
             ))}
           </div>
         </div>
       </section>
 
       {/* ── CTA ─────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-pink-600 py-16 lg:py-20">
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <Baby className="mx-auto mb-4 h-12 w-12 text-white/60" />
-          <h2 className="text-2xl font-extrabold text-white sm:text-3xl">Konsultasi gratis untuk ibu hamil & menyusui</h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">Tim ahli gizi kami siap membantu perjalanan kehamilan dan menyusui Anda</p>
-          <a href={getWaLink("Halo kak, saya sedang hamil/menyusui/promil dan ingin tanya tentang Program Body for Baby")} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-white px-8 py-4 text-base font-bold text-pink-700 shadow-xl transition hover:shadow-2xl hover:scale-105">
-            <Phone className="h-5 w-5" /> Chat WhatsApp Sekarang
-          </a>
+      <section className="mx-4 lg:mx-10 mb-20">
+        <div className="relative overflow-hidden rounded-[4rem] bg-brand-600 py-20 lg:py-28 px-6 text-center">
+          <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-white/10 blur-[100px]" />
+          <div className="absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-white/5 blur-[100px]" />
+          
+          <div className="relative z-10 mx-auto max-w-3xl">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 mb-8">
+              <MessageCircle className="h-10 w-10 text-white" />
+            </div>
+            <h2 className="text-4xl font-black text-white sm:text-5xl tracking-tight">
+              Konsultasi Gratis untuk Bunda
+            </h2>
+            <p className="mx-auto mt-6 text-xl font-medium text-white/80 leading-relaxed">
+              Tim ahli gizi kami siap membantu perjalanan kehamilan dan menyusui Bunda agar tetap sehat dan optimal.
+            </p>
+            <div className="mt-12">
+              <a
+                href={getWaLink("Halo kak, saya sedang hamil/menyusui/promil dan ingin tanya tentang Program Body for Baby")}
+                target="_blank" rel="noopener noreferrer"
+              >
+                <Button variant="secondary" size="lg" className="h-16 px-12 text-lg shadow-xl hover:scale-105 transition-all">
+                  <Phone className="mr-3 h-6 w-6 text-brand-600" />
+                  Chat WhatsApp Sekarang
+                </Button>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────── */}
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="mb-12 text-center text-3xl font-extrabold text-gray-900">Pertanyaan yang Sering Ditanyakan</h2>
-          <div className="space-y-3">
+      <section className="py-24 bg-surface-50">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="mb-16 text-center space-y-4">
+            <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-brand-600">Common Questions</h2>
+            <h3 className="text-4xl font-black text-neutral-900 tracking-tight">FAQ</h3>
+          </div>
+          <div className="space-y-4">
             {FAQS.map((faq, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:shadow-sm">
-                <button type="button" onClick={() => setOpenFaq(openFaq === i ? null : i)} className="flex w-full items-center justify-between px-6 py-5 text-left">
-                  <span className="pr-4 font-semibold text-gray-900">{faq.q}</span>
-                  <ChevronDown className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
+              <div key={i} className="overflow-hidden rounded-[2rem] border border-neutral-100 bg-white transition-all hover:shadow-card">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between px-8 py-6 text-left group"
+                >
+                  <span className="pr-4 text-lg font-bold text-neutral-800 group-hover:text-brand-600 transition-colors">{faq.q}</span>
+                  <div className={`p-2 rounded-full transition-all ${openFaq === i ? 'bg-brand-500 text-white rotate-180' : 'bg-neutral-50 text-neutral-400 group-hover:bg-brand-50 group-hover:text-brand-600'}`}>
+                    <ChevronDown className="h-5 w-5 shrink-0" />
+                  </div>
                 </button>
-                {openFaq === i && <div className="border-t border-gray-50 px-6 pb-5 pt-3 text-sm text-gray-600 leading-relaxed">{faq.a}</div>}
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-8 pb-8 text-base font-medium leading-relaxed text-neutral-500 border-t border-neutral-50 pt-4">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Application\DTOs\CreateConsultationDTO;
+use App\Application\Services\ConsultationService;
 use App\Mail\ConsultationConfirmationMail;
 use App\Models\Consultation;
 use App\Models\NutritionistProgram;
@@ -13,9 +15,13 @@ class ConsultationController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(
+        private ConsultationService $consultationService,
+    ) {}
+
     /**
      * POST /api/consultations/schedule
-     * Buat jadwal konsultasi baru.
+     * Schedule a new consultation.
      */
     public function schedule(Request $request)
     {
@@ -43,34 +49,25 @@ class ConsultationController extends Controller
             return $this->error('Kuota konsultasi untuk program ini sudah habis.', 422);
         }
 
-        $consultation = Consultation::create([
+        $dto = CreateConsultationDTO::fromArray([
             'nutritionist_program_id' => $program->id,
             'type'                    => $validated['type'],
-            'status'                  => 'scheduled',
-            'scheduled_at'            => Carbon::parse($validated['scheduled_at']),
+            'scheduled_at'            => $validated['scheduled_at'],
             'duration_minutes'        => $validated['duration_minutes'] ?? 30,
-            'notes'                   => $validated['notes'],
+            'notes'                   => $validated['notes'] ?? null,
         ]);
 
-        // Kurangi sisa konsultasi jika ada kuota
+        $consultation = $this->consultationService->schedule($dto);
+
+        // Decrement remaining consultations if there's a quota
         if ($program->remaining_consultations !== null) {
             $program->decrement('remaining_consultations');
         }
 
-        // Kirim email konfirmasi
-        try {
-            if ($program->client?->email) {
-                Mail::to($program->client->email)
-                    ->send(new ConsultationConfirmationMail($consultation, $program));
-            }
-
-            if ($program->nutritionist?->email) {
-                Mail::to($program->nutritionist->email)
-                    ->send(new ConsultationConfirmationMail($consultation, $program));
-            }
-        } catch (\Throwable $e) {
-            // Mail failure should not block the booking
-            report($e);
+        // Send confirmation emails
+        $eloquentConsultation = Consultation::find($consultation->id);
+        if ($eloquentConsultation) {
+            $this->sendConfirmationEmails($eloquentConsultation, $program);
         }
 
         return $this->success('Jadwal konsultasi berhasil dibuat.', [
@@ -80,20 +77,19 @@ class ConsultationController extends Controller
 
     /**
      * PUT /api/consultations/{id}/complete
-     * Tandai konsultasi selesai.
+     * Mark a consultation as completed.
      */
     public function complete(Request $request, int $id)
     {
-        $consultation = Consultation::query()
-            ->whereHas('nutritionistProgram', function ($query) use ($request) {
-                $query->where('client_id', $request->user()->id)
-                      ->orWhere('nutritionist_id', $request->user()->id);
-            })
-            ->findOrFail($id);
+        $consultation = Consultation::with('nutritionistProgram')->findOrFail($id);
 
-        $consultation->update([
-            'status' => 'completed',
-        ]);
+        $this->authorize('complete', $consultation);
+
+        try {
+            $this->consultationService->complete($id);
+        } catch (\DomainException $e) {
+            return $this->error($e->getMessage(), 422);
+        }
 
         return $this->success('Konsultasi ditandai selesai.', [
             'id'     => $consultation->id,
@@ -103,7 +99,7 @@ class ConsultationController extends Controller
 
     /**
      * GET /api/consultations/upcoming
-     * Daftar konsultasi yang akan datang + data profil untuk halaman konsultasi klien.
+     * Get upcoming consultations and client/nutritionist profile data.
      */
     public function upcoming(Request $request)
     {
@@ -161,15 +157,41 @@ class ConsultationController extends Controller
         ]);
     }
 
-    private function transformConsultation(Consultation $c, NutritionistProgram $program): array
+    /**
+     * Send confirmation emails for a newly scheduled consultation.
+     */
+    private function sendConfirmationEmails(Consultation $consultation, NutritionistProgram $program): void
+    {
+        try {
+            if ($program->client?->email) {
+                Mail::to($program->client->email)
+                    ->send(new ConsultationConfirmationMail($consultation, $program));
+            }
+
+            if ($program->nutritionist?->email) {
+                Mail::to($program->nutritionist->email)
+                    ->send(new ConsultationConfirmationMail($consultation, $program));
+            }
+        } catch (\Throwable $e) {
+            // Mail failure should not block the booking
+            report($e);
+        }
+    }
+
+    /**
+     * Transform a domain consultation entity for API response.
+     */
+    private function transformConsultation(object $c, NutritionistProgram $program): array
     {
         return [
             'id'               => $c->id,
-            'type'             => $c->type,
-            'status'           => $c->status,
-            'scheduled_at'     => optional($c->scheduled_at)->toISOString(),
-            'duration_minutes' => $c->duration_minutes,
-            'notes'            => $c->notes,
+            'type'             => is_object($c->type) ? $c->type : $c->type,
+            'status'           => is_object($c->status) ? $c->status->value : $c->status,
+            'scheduled_at'     => $c->scheduledAt instanceof \DateTimeImmutable
+                ? $c->scheduledAt->format('c')
+                : (is_string($c->scheduledAt ?? null) ? $c->scheduledAt : optional($c->scheduled_at ?? null)?->toISOString()),
+            'duration_minutes' => $c->durationMinutes ?? $c->duration_minutes ?? 30,
+            'notes'            => $c->notes ?? null,
             'client'           => [
                 'id'   => $program->client?->id,
                 'name' => $program->client?->name,

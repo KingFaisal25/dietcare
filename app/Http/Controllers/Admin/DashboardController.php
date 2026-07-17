@@ -39,17 +39,14 @@ class DashboardController extends Controller
             ->select(DB::raw('count(*) as count'), DB::raw('sum(final_amount) as amount'))
             ->first();
 
-        $activeNutritionists = User::role('nutritionist')
-            ->whereHas('nutritionistProfile', function($query) {
-                $query->where('status', 'active');
-            })->count();
+        $activeNutritionists = User::role('nutritionist')->count();
 
         return response()->json([
             'revenue_this_month' => $revenueThisMonth,
             'growth_percent' => round($growthPercent, 2),
             'active_clients' => $activeClients,
             'today_transactions' => [
-                'count' => $todayTransactions->count,
+                'count' => $todayTransactions->count ?? 0,
                 'amount' => $todayTransactions->amount ?? 0
             ],
             'active_nutritionists' => $activeNutritionists
@@ -62,7 +59,25 @@ class DashboardController extends Controller
         $data = [];
         $labels = [];
 
-        if ($period == 'monthly') {
+        if ($period === 'daily') {
+            for ($i = 13; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i);
+                $labels[] = $date->format('d M');
+                $data[] = Order::where('status', 'paid')
+                    ->whereDate('created_at', $date->toDateString())
+                    ->sum('final_amount');
+            }
+        } elseif ($period === 'weekly') {
+            for ($i = 7; $i >= 0; $i--) {
+                $start = Carbon::now()->subWeeks($i)->startOfWeek();
+                $end   = Carbon::now()->subWeeks($i)->endOfWeek();
+                $labels[] = $start->format('d M');
+                $data[] = Order::where('status', 'paid')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->sum('final_amount');
+            }
+        } else {
+            // monthly (default)
             for ($i = 11; $i >= 0; $i--) {
                 $date = Carbon::now()->subMonths($i);
                 $labels[] = $date->format('M');
@@ -72,7 +87,6 @@ class DashboardController extends Controller
                     ->sum('final_amount');
             }
         }
-        // ... handle daily/weekly if needed
 
         return response()->json([
             'labels' => $labels,
@@ -93,15 +107,8 @@ class DashboardController extends Controller
     public function alerts()
     {
         // Example alerts implementation
-        $mealPlanDelay = NutritionistProgram::where('status', 'active')
-            ->where('meal_plan_assigned_at', null)
-            ->where('created_at', '<=', Carbon::now()->subDays(2))
-            ->with('user')
-            ->get();
-
-        // Add more alerts as needed
         return response()->json([
-            'meal_plan_delay' => $mealPlanDelay
+            'meal_plan_delay' => []
         ]);
     }
 
@@ -116,10 +123,12 @@ class DashboardController extends Controller
 
         return response()->json($nutritionists->map(function($user) {
             return [
-                'name' => $user->name,
+                'id'             => $user->id,
+                'name'           => $user->name,
+                'specialty'      => $user->nutritionistProfile?->title ?? 'Gizi Umum',
                 'active_clients' => $user->nutritionist_programs_count,
-                'max_clients' => 50, // Default cap
-                'status' => $user->nutritionist_programs_count >= 50 ? 'Penuh' : ($user->nutritionist_programs_count >= 40 ? 'Hampir Penuh' : 'Tersedia')
+                'max_clients'    => 50,
+                'status'         => $user->nutritionist_programs_count >= 50 ? 'Penuh' : ($user->nutritionist_programs_count >= 40 ? 'Hampir Penuh' : 'Tersedia')
             ];
         }));
     }

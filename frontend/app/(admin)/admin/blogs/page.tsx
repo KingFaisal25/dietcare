@@ -153,21 +153,27 @@ function BlogFormModal({
       form.galleryFiles.forEach(f => payload.append("images[]", f));
       form.removeImageIds.forEach(id => payload.append("remove_images[]", String(id)));
 
+      // NOTE: Do NOT set Content-Type manually — axios auto-sets multipart/form-data
+      // with the correct boundary when it detects a FormData body.
       if (isEdit) {
         await api.post(`/admin/blogs/${post!.id}`, payload, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
         toast.success("Artikel berhasil diperbarui");
       } else {
         await api.post("/admin/blogs", payload, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         });
-        toast.success("Artikel berhasil dipublikasikan");
+        toast.success("Artikel berhasil " + (form.status === 'published' ? 'dipublikasikan' : 'disimpan sebagai draft'));
       }
       onRefresh();
       onClose();
     } catch (error: unknown) {
-      const err = error as { response?: { status?: number; data?: { errors?: Record<string, string | string[]> } } };
+      const err = error as { response?: { status?: number; data?: { message?: string; errors?: Record<string, string | string[]> } } };
       if (err?.response?.status === 422) {
         const serverErrors = err.response?.data?.errors || {};
         const mapped: Record<string, string> = {};
@@ -176,8 +182,11 @@ function BlogFormModal({
         }
         setErrors(mapped);
         toast.error("Periksa kembali isian formulir");
+      } else if (err?.response?.status === 419) {
+        toast.error("Sesi keamanan kadaluarsa. Silakan refresh halaman dan coba lagi.");
       } else {
-        toast.error("Gagal menyimpan artikel");
+        const msg = err?.response?.data?.message || "Gagal menyimpan artikel";
+        toast.error(msg);
       }
     } finally {
       setIsSaving(false);
@@ -429,6 +438,27 @@ export default function BlogManagementPage() {
   const handleEdit   = (post: BlogPost) => { setEditingPost(post); setIsModalOpen(true); };
   const handleClose  = () => { setIsModalOpen(false); setEditingPost(null); };
 
+  const handleToggleStatus = async (post: BlogPost) => {
+    const newStatus = post.status === 'published' ? 'draft' : 'published';
+    try {
+      const payload = new FormData();
+      payload.append("title", post.title);
+      payload.append("content", post.content);
+      payload.append("category", post.category);
+      payload.append("status", newStatus);
+      
+      await api.post(`/admin/blogs/${post.id}`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      toast.success(`Artikel berhasil ${newStatus === 'published' ? 'dipublikasikan' : 'diarsipkan sebagai draft'}`);
+      fetchPosts();
+    } catch {
+      toast.error("Gagal mengubah status publikasi");
+    }
+  };
+
   const filtered = posts.filter(p =>
     p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -547,12 +577,18 @@ export default function BlogManagementPage() {
                       </td>
                       {/* Status */}
                       <td className="px-5 py-4">
-                        <Badge
-                          variant={post.status === "published" ? "success" : "warning"}
-                          className="text-[11px] font-bold capitalize px-2.5 py-1"
+                        <button
+                          onClick={() => handleToggleStatus(post)}
+                          title="Klik untuk mengubah status"
+                          className="hover:scale-105 transition-transform"
                         >
-                          {post.status === "published" ? "Published" : "Draft"}
-                        </Badge>
+                          <Badge
+                            variant={post.status === "published" ? "success" : "warning"}
+                            className="text-[11px] font-bold capitalize px-2.5 py-1 cursor-pointer"
+                          >
+                            {post.status === "published" ? "Published" : "Draft"}
+                          </Badge>
+                        </button>
                       </td>
                       {/* Date */}
                       <td className="px-5 py-4">

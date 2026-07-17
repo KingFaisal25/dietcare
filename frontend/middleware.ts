@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
   const role = request.cookies.get('role')?.value;
+  const isAuthenticated = !!role;
   
   const { pathname } = request.nextUrl;
   
@@ -23,19 +23,19 @@ export function middleware(request: NextRequest) {
                        pathname.startsWith('/review');
 
   // 1. Not logged in: Redirect to login if trying to access any protected area
-  if (!token && (isAdminPage || isNutritionistPage || isClientPage)) {
+  if (!isAuthenticated && (isAdminPage || isNutritionistPage || isClientPage)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // 2. Already logged in: Redirect away from auth pages
-  if (token && isAuthPage) {
+  if (isAuthenticated && isAuthPage) {
     if (role === 'admin') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     if (role === 'nutritionist') return NextResponse.redirect(new URL('/nutritionist/dashboard', request.url));
     return NextResponse.redirect(new URL('/klien-dashboard', request.url));
   }
 
   // 3. Role-based Authorization Checks
-  if (token && role) {
+  if (isAuthenticated && role) {
     if (isAdminPage && role !== 'admin') {
       return NextResponse.redirect(new URL('/klien-dashboard', request.url));
     }
@@ -72,3 +72,4 @@ export const config = {
     '/register'
   ],
 };
+
