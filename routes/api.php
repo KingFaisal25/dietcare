@@ -54,6 +54,10 @@ Route::prefix('public/calculate')->middleware('throttle:60,1')->group(function (
 Route::get('public/foods/search-local', [PublicFreeToolsController::class, 'searchFoodLocal']);
 Route::get('public/foods/jajanan', [PublicFreeToolsController::class, 'searchJajanan']);
 
+// Public Food Photo Analysis (Free Calculator — No Auth, Rate Limited)
+Route::post('/public/food-analysis/analyze', [\App\Http\Controllers\Api\FoodAnalysisController::class, 'analyzePhoto'])
+    ->middleware('throttle:10,1'); // 10 requests per minute per IP
+
 // Public Program Routes (No Auth Needed)
 Route::prefix('public/programs')->group(function () {
     Route::middleware('throttle:api-public-read')->group(function () {
@@ -274,3 +278,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/report/pdf', [ReportController::class, 'downloadPdf']);
     });
 });
+
+
+// Debug AI Configuration
+Route::get('/debug/ai', [\App\Http\Controllers\Api\FoodAnalysisController::class, 'debugAI']);

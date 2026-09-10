@@ -13,6 +13,7 @@
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.10.1",
         "midtrans/midtrans-php": "^2.6",
         "openai-php/client": "^0.19.1",
@@ -94,3 +95,4 @@
     "minimum-stability": "stable",
     "prefer-stable": true
 }
+

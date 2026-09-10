@@ -78,3 +78,11 @@ export async function getUserApi(): Promise<User> {
 export function resolveApiUrl(path: string): string {
   return buildApiUrl(path);
 }
+
+/**
+ * Get the URL to redirect to for Google OAuth login.
+ * Points to the Laravel backend which handles the Socialite redirect.
+ */
+export function getGoogleLoginUrl(): string {
+  return buildApiUrl('/auth/google');
+}

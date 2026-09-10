@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -26,11 +25,6 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $user = $this->authService->register($request->validated());
-
-        $eloquentUser = \App\Models\User::find($user->id);
-        if ($eloquentUser) {
-            event(new Registered($eloquentUser));
-        }
 
         return $this->success('Registration successful. Please check your email to verify your account.', [
             'user' => [
@@ -75,7 +69,7 @@ class AuthController extends Controller
         $userWithRelations = $user;
         $avatar = $user->avatar_url;
         $nutritionistProfile = null;
-        
+
         if ($role === UserRole::Nutritionist) {
             $userWithRelations->load('nutritionistProfile');
             if ($userWithRelations->nutritionistProfile && $userWithRelations->nutritionistProfile->photo) {

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\SocialAuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,10 +19,15 @@ Route::prefix('api')->middleware('web')->group(function () {
         return response()->json(['token' => csrf_token()]);
     });
 
+    // Google OAuth (no CSRF needed — initial redirect from browser, callback from Google)
+    Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle']);
+    Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+
     if (app()->environment('local')) {
         Route::get('/test-profile-bug', function () {
             $logFile = storage_path('logs/laravel.log');
-            if (!file_exists($logFile)) return 'No log file';
+            if (!file_exists($logFile))
+                return 'No log file';
 
             $lines = file($logFile);
             $lastLines = array_slice($lines, -50);
@@ -33,11 +39,11 @@ Route::prefix('api')->middleware('web')->group(function () {
     if (app()->environment('local')) {
         Route::get('/csrf-debug', function () {
             return response()->json([
-                'session_id'   => session()->getId(),
-                'csrf_token'   => csrf_token(),
+                'session_id' => session()->getId(),
+                'csrf_token' => csrf_token(),
                 'session_started' => session()->isStarted(),
-                'session_driver'  => config('session.driver'),
-                'app_key_set'  => !empty(config('app.key')),
+                'session_driver' => config('session.driver'),
+                'app_key_set' => !empty(config('app.key')),
             ]);
         });
     }
@@ -51,3 +57,5 @@ Route::prefix('api')->middleware('web')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 });
+
+

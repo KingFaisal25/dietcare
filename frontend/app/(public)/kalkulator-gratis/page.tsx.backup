@@ -11,6 +11,7 @@ import {
   FiSearch,
   FiClock,
   FiDollarSign,
+  FiAlertTriangle
 } from 'react-icons/fi';
 import Link from 'next/link';
 import gsap from 'gsap';
@@ -28,7 +29,6 @@ import { FastingPlanner } from '@/components/calculators/FastingPlanner';
 import { BudgetDietCalculator } from '@/components/calculators/BudgetDietCalculator';
 import { CheatMealChecker } from '@/components/calculators/CheatMealChecker';
 import { RecipeGenerator } from '@/components/calculators/RecipeGenerator';
-import FoodPhotoAnalysis from '@/components/calculators/FoodPhotoAnalysis';
 import { JajananChecker } from '@/components/calculators/JajananChecker';
 
 export default function FreeCalculatorsPage() {
@@ -157,27 +157,27 @@ export default function FreeCalculatorsPage() {
       <div ref={heroRef} className="relative z-10 px-4 pb-10 pt-16 sm:px-6 md:pb-14 md:pt-24">
         <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_.9fr]">
           <div>
-            <div className="hero-element mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-emerald-700 shadow-sm backdrop-blur">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              </span>
-              100% Gratis &amp; Tanpa Login
-            </div>
+          <div className="hero-element mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-emerald-700 shadow-sm backdrop-blur">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            100% Gratis & Tanpa Login
+          </div>
 
-            <h1 className="hero-element mb-6 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
-              Kenali tubuhmu, <br />
-              <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 bg-clip-text text-transparent">
-                rawat dengan tepat
-              </span>
-            </h1>
+          <h1 className="hero-element mb-6 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
+            Kenali tubuhmu, <br />
+            <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 bg-clip-text text-transparent">
+              rawat dengan tepat
+            </span>
+          </h1>
 
-            <p className="hero-element max-w-2xl text-base font-medium leading-7 text-slate-600 sm:text-lg">
-              Hitung BMI, kebutuhan kalori, hidrasi, dan berbagai kebutuhan gizi dengan panduan sederhana yang mudah dipahami.
-            </p>
-            <div className="hero-element mt-8 flex flex-wrap gap-3 text-sm font-bold text-slate-700">
-              {['Berbasis data', 'Mudah digunakan', 'Privasi terjaga'].map((item) => <span key={item} className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-2 shadow-sm">✓ {item}</span>)}
-            </div>
+          <p className="hero-element max-w-2xl text-base font-medium leading-7 text-slate-600 sm:text-lg">
+            Hitung BMI, kebutuhan kalori, hidrasi, dan berbagai kebutuhan gizi dengan panduan sederhana yang mudah dipahami.
+          </p>
+          <div className="hero-element mt-8 flex flex-wrap gap-3 text-sm font-bold text-slate-700">
+            {['Berbasis data', 'Mudah digunakan', 'Privasi terjaga'].map((item) => <span key={item} className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-2 shadow-sm">✓ {item}</span>)}
+          </div>
           </div>
           <div className="hero-element relative mx-auto w-full max-w-sm rounded-[2rem] border border-white/80 bg-white/75 p-5 shadow-[0_24px_70px_rgba(29,162,113,.16)] backdrop-blur-xl">
             <div className="rounded-[1.5rem] bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white">
@@ -218,10 +218,11 @@ export default function FreeCalculatorsPage() {
                 { id: 'mealplan', icon: FiCoffee, label: 'Menu 3 Hari', color: 'purple' },
                 { id: 'food', icon: FiSearch, label: 'Cari Makanan', color: 'yellow' },
                 { id: 'fasting', icon: FiClock, label: 'Jadwal Puasa', color: 'teal' },
+                { id: 'jajanan', icon: FiZap, label: 'Kalori Jajanan', color: 'orange' },
                 { id: 'age', icon: FiActivity, label: 'Usia Tubuh', color: 'indigo' },
                 { id: 'budget', icon: FiDollarSign, label: 'Diet Hemat', color: 'emerald' },
-                { id: 'jajanan', icon: FiZap, label: 'Kalori Jajanan', color: 'orange' },
-                { id: 'foodphoto', icon: FiSearch, label: 'Foto Makanan', color: 'pink' },
+                { id: 'recipe', icon: FiCoffee, label: 'Isi Kulkas Jadi Apa?', color: 'emerald' },
+                { id: 'cheat', icon: FiAlertTriangle, label: 'Boleh Cheat?', color: 'red' },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -246,10 +247,7 @@ export default function FreeCalculatorsPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`relative min-h-14 rounded-2xl px-3 py-3 text-center text-xs font-black leading-4 transition-all duration-300 group focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-400/50 sm:text-sm ${colorClasses}`}
                   >
-                    <span className="relative z-10 flex flex-col items-center justify-center gap-1.5">
-                      <Icon className={`text-lg ${iconColor}`} aria-hidden="true" />
-                      <span>{tab.label}</span>
-                    </span>
+                    <span className="relative z-10 flex flex-col items-center justify-center gap-1.5"><Icon className={`text-lg ${iconColor}`} aria-hidden="true" /><span>{tab.label}</span></span>
                   </button>
                 );
               })}
@@ -268,8 +266,7 @@ export default function FreeCalculatorsPage() {
             {activeTab === 'budget' && <BudgetDietCalculator />}
             {activeTab === 'cheat' && <CheatMealChecker />}
             {activeTab === 'recipe' && <RecipeGenerator />}
-            {activeTab === 'jajanan' && <JajananChecker />}
-            {activeTab === 'foodphoto' && <FoodPhotoAnalysis />}
+            {activeTab === 'jajanan' && <JajananChecker />}\n            {activeTab === 'foodphoto' && <FoodPhotoAnalysis />
           </div>
 
           <section aria-labelledby="history-title" className="mx-auto mt-6 max-w-3xl rounded-3xl border border-slate-200 bg-slate-50 p-5 md:p-6">
@@ -306,3 +303,14 @@ export default function FreeCalculatorsPage() {
     </div>
   );
 }
+
+
+// Import FoodPhotoAnalysis component
+import { FoodPhotoAnalysis } from "@/components/calculators/FoodPhotoAnalysis";
+
+
+
+
+
+
+

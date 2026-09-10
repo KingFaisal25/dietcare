@@ -4,29 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class FoodAnalysis extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'image_path',
-        'image_url',
-        'food_diary_id',
-        'ai_result',
-        'total_calories',
-        'total_protein',
-        'total_carbs',
-        'total_fat',
-        'confidence_avg',
-        'meal_type',
-        'eaten_at',
+        "user_id",
+        "image_path",
+        "status",
+        "food_items",
+        "total_nutrition",
+        "suggestions",
+        "analysis_time",
     ];
 
     protected $casts = [
-        'ai_result' => 'array',
-        'eaten_at' => 'datetime',
+        "food_items" => "array",
+        "total_nutrition" => "array",
+        "analysis_time" => "datetime",
     ];
 
     public function user()

@@ -17,7 +17,7 @@ class OpenRouterService implements AIServiceInterface
             ->withApiKey(config('services.openrouter.key'))
             ->withBaseUri('https://openrouter.ai/api/v1')
             ->make();
-        
+
         $this->defaultModel = config('services.openrouter.model', 'google/gemma-7b-it:free');
     }
 
@@ -42,10 +42,9 @@ class OpenRouterService implements AIServiceInterface
 
     public function analyzeImage(string $systemPrompt, string $base64Image, array $options = []): array
     {
-        // Many free OpenRouter models don't support Vision, 
-        // fallback to paid models or other provider if needed.
+        // Use nvidia/nemotron-nano-12b-v2-vl:free as the default model for vision requests
         $response = $this->client->chat()->create([
-            'model' => $options['model'] ?? 'google/gemini-flash-1.5', // OpenRouter's cheap vision model
+            'model' => $options['model'] ?? 'nvidia/nemotron-nano-12b-v2-vl:free',
             'messages' => [
                 [
                     'role' => 'user',
@@ -63,10 +62,14 @@ class OpenRouterService implements AIServiceInterface
             'response_format' => ['type' => 'json_object'],
         ]);
 
+        $tokensUsed = $response->usage->totalTokens ?? 0;
+        $promptTokens = $response->usage->promptTokens ?? 0;
+        $completionTokens = $response->usage->completionTokens ?? 0;
+
         return [
             'content' => $response->choices[0]->message->content,
-            'tokens_used' => $response->usage->totalTokens,
-            'cost_usd' => ($response->usage->promptTokens * 0.075 / 1000000) + ($response->usage->completionTokens * 0.3 / 1000000), // Gemini 1.5 Flash on OpenRouter is very cheap
+            'tokens_used' => $tokensUsed,
+            'cost_usd' => ($promptTokens * 0.075 / 1000000) + ($completionTokens * 0.3 / 1000000),
         ];
     }
 

@@ -82,7 +82,11 @@ api.interceptors.response.use(
       if (typeof window !== 'undefined') {
         Cookies.remove('role', { path: '/' });
         clearCsrfToken();
-        window.location.href = '/login';
+
+        const isAuthPage = window.location.pathname.startsWith('/login') || window.location.pathname.startsWith('/register');
+        if (!isAuthPage) {
+          window.location.href = '/login';
+        }
       }
     }
 

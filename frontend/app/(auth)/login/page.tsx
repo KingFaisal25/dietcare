@@ -1,25 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { getGoogleLoginUrl } from '@/lib/auth';
 import { Scene3DBackground } from '@/components/ui/Scene3DBackground';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiArrowLeft, FiCheckCircle, FiAlertCircle, FiGithub } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiArrowLeft, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple, FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const searchParams = useSearchParams();
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Handle OAuth error redirects from backend
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    if (oauthError === 'google_auth_failed') {
+      setError('Login dengan Google gagal. Silakan coba lagi.');
+    } else if (oauthError === 'account_deactivated') {
+      setError('Akun Anda telah dinonaktifkan.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,13 +76,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-[var(--background)] transition-colors duration-500 relative overflow-hidden">
       <Scene3DBackground subtle />
-      
+
       <div className="absolute right-6 top-6 z-50 flex items-center gap-4">
         <ThemeToggle />
       </div>
 
       {/* LEFT: FORM SECTION */}
-      <motion.div 
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -86,7 +99,7 @@ export default function LoginPage() {
             <Link href="/" className="inline-flex items-center gap-4 group">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 shadow-xl shadow-green-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </div>
               <div>
@@ -167,8 +180,8 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   className="w-full h-14 pl-14 pr-14 rounded-2xl bg-[var(--background-soft)] border border-[var(--border-color)] text-[var(--foreground)] font-bold text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all outline-none placeholder:text-[var(--muted-foreground)]/50 shadow-inner"
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-green-500 transition-colors"
                 >
@@ -180,11 +193,11 @@ export default function LoginPage() {
             <motion.div variants={itemVariants} className="flex items-center justify-between px-1">
               <label className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={rememberMe}
                     onChange={e => setRememberMe(e.target.checked)}
-                    className="sr-only" 
+                    className="sr-only"
                   />
                   <div className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-green-500 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'border-[var(--border-color)] bg-[var(--background-soft)]'}`}>
                     {rememberMe && <FiCheckCircle size={14} className="text-white" />}
@@ -215,7 +228,7 @@ export default function LoginPage() {
             </motion.div>
           </form>
 
-          {/* Social Logins */}
+          {/* Google Login */}
           <motion.div variants={itemVariants} className="mt-10">
             <div className="relative flex items-center gap-4 mb-8">
               <div className="h-px flex-grow bg-[var(--border-color)]" />
@@ -223,23 +236,16 @@ export default function LoginPage() {
               <div className="h-px flex-grow bg-[var(--border-color)]" />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { icon: <FcGoogle size={24} />, label: 'Google' },
-                { icon: <FaApple size={24} className="text-[var(--foreground)]" />, label: 'Apple' },
-                { icon: <FiGithub size={24} className="text-[var(--foreground)]" />, label: 'GitHub' },
-              ].map((social, i) => (
-                <button 
-                  key={i}
-                  type="button"
-                  className="h-14 rounded-2xl bg-[var(--background-soft)] border border-[var(--border-color)] flex items-center justify-center hover:bg-[var(--background-elevated)] hover:border-green-500/30 hover:-translate-y-1 transition-all shadow-sm group"
-                >
-                  <div className="group-hover:scale-110 transition-transform duration-300">
-                    {social.icon}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => { window.location.href = getGoogleLoginUrl(); }}
+              className="w-full h-14 rounded-2xl bg-[var(--background-soft)] border border-[var(--border-color)] flex items-center justify-center gap-3 hover:bg-[var(--background-elevated)] hover:border-green-500/30 hover:-translate-y-1 transition-all shadow-sm group"
+            >
+              <div className="group-hover:scale-110 transition-transform duration-300">
+                <FcGoogle size={24} />
+              </div>
+              <span className="font-bold text-sm text-[var(--foreground)]">Masuk dengan Google</span>
+            </button>
           </motion.div>
 
           <motion.p variants={itemVariants} className="mt-12 text-center text-sm font-bold text-[var(--muted-foreground)]">
@@ -256,23 +262,23 @@ export default function LoginPage() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-green-950/40 via-slate-900 to-emerald-950/40" />
           <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-          
-          <motion.div 
-            animate={{ 
+
+          <motion.div
+            animate={{
               scale: [1, 1.2, 1],
               opacity: [0.1, 0.2, 0.1],
               rotate: [0, 90, 0]
             }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-green-500/20 rounded-full blur-[120px]" 
+            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-green-500/20 rounded-full blur-[120px]"
           />
         </div>
 
         <TiltCard className="relative z-10 w-full max-w-2xl bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[3.5rem] p-16 shadow-2xl overflow-hidden group">
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-500/10 rounded-full blur-[80px] group-hover:scale-125 transition-transform duration-1000" />
-          
+
           <div className="flex flex-col items-center text-center">
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="mb-12 w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-green-400/20 to-emerald-500/20 border border-white/20 flex items-center justify-center shadow-2xl backdrop-blur-md"
@@ -286,7 +292,7 @@ export default function LoginPage() {
               Level Up Your <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Health Game</span>
             </h2>
-            
+
             <p className="text-slate-400 text-lg font-medium max-w-sm mb-12 leading-relaxed">
               Platform gizi pintar dengan analisis AI dan pendampingan ahli gizi profesional.
             </p>
@@ -297,7 +303,7 @@ export default function LoginPage() {
                 { icon: '👩‍⚕️', text: 'Certified Nutritionist Consultation' },
                 { icon: '🏆', text: 'Personalized Meal Plans' },
               ].map((feat, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -327,9 +333,9 @@ export default function LoginPage() {
       </div>
 
       {/* Floating Support Button */}
-      <a 
-        href={waLink} 
-        target="_blank" 
+      <a
+        href={waLink}
+        target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[100] group flex items-center gap-4"
       >

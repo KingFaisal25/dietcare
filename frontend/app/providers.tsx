@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { useAuthStore } from "@/lib/store/authStore";
 import { getUserApi } from "@/lib/auth";
+import Cookies from "js-cookie";
 
 type ThemeMode = "light" | "dark" | "system";
 
@@ -52,6 +53,13 @@ function AuthInitializer() {
     if (initialized.current) return;
     initialized.current = true;
 
+    // Check if role cookie exists before calling API to prevent loop for guests/unauthenticated clients
+    const role = Cookies.get('role');
+    if (!role) {
+      clearAuth();
+      return;
+    }
+
     getUserApi()
       .then((user) => setUser(user))
       .catch(() => clearAuth());
@@ -85,8 +93,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     () => ({
       theme: "light",
       resolvedTheme: "light",
-      setTheme: () => {},
-      toggleTheme: () => {},
+      setTheme: () => { },
+      toggleTheme: () => { },
     }),
     []
   );

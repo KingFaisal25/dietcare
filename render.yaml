@@ -51,6 +51,12 @@
         value: database
       - key: CACHE_STORE
         value: database
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
   - type: worker
     name: dietcare-worker
     runtime: docker
