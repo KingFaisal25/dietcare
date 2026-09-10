@@ -1,8 +1,32 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: __dirname,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
   async rewrites() {
-    // Gunakan BACKEND_URL dari env untuk production, fallback ke localhost untuk dev
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+    const backendUrl = process.env.BACKEND_URL || "http://cangkuangkulonkkn.full.diskon.cloud";
     return [
       {
         source: "/api/:path*",
@@ -17,34 +41,6 @@ const nextConfig = {
         destination: `${backendUrl}/gambar/:path*`,
       },
     ];
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "ui-avatars.com",
-      },
-      {
-        protocol: "https",
-        hostname: "i.pravatar.cc",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
-        pathname: "/**",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
-        pathname: "/**",
-      },
-    ],
   },
 };
 

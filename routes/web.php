@@ -58,4 +58,22 @@ Route::prefix('api')->middleware('web')->group(function () {
     });
 });
 
+Route::get('/run-migrate', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database migration & seeding completed successfully!',
+            'output' => \Illuminate\Support\Facades\Artisan::output(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});
+
+
 

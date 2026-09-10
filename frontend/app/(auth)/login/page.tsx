@@ -14,7 +14,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 
-export default function LoginPage() {
+function LoginContent() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -350,3 +350,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[var(--background)]"><div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" /></div>}>
+      <LoginContent />
+    </React.Suspense>
+  );
+}
+
