@@ -14,6 +14,7 @@ import {
   Target,
   Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import ProgramCard from "@/components/ProgramCard";
 import ProgramTypeToggle from "@/components/ProgramTypeToggle";
 import ProgramCompare from "@/components/ProgramCompare";
@@ -24,6 +25,7 @@ import { BodyComposition3D } from "@/components/BodyComposition3D";
 import { Gallery } from "@/components/ui/Gallery";
 import { TiltCard } from "@/components/ui/TiltCard";
 import { Button } from "@/components/ui/Button";
+import { getWaLink } from "@/lib/wa";
 
 const SUCCESS_STORIES = [
   { id: 1, url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop", title: "Transformasi 3 Bulan", category: "Weight Loss", description: "Turun 12kg dengan pola makan seimbang tanpa rasa lapar berlebih." },
@@ -35,8 +37,6 @@ const SUCCESS_STORIES = [
 ];
 
 const CATEGORIES = ["Weight Loss", "Body Building", "Meal Plan", "Coaching", "Habit"];
-import { getWaLink } from "@/lib/wa";
-import { motion, AnimatePresence } from "framer-motion";
 
 // ── Data ─────────────────────────────────────────────────
 
